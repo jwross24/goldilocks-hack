@@ -166,7 +166,12 @@ export function AssessmentCard({
           {assessment.cited_value && assessment.cited_value !== "null" && (() => {
             // Normalize cited_value display: ensure $ for over-budget,
             // ″ for seat-height/depth measurements. TIM is inconsistent.
-            const raw = assessment.cited_value.trim();
+            // First, strip any leaked JSON field syntax like
+            // `seat_height_": 15.74` → `15.74`.
+            const raw = assessment.cited_value
+              .trim()
+              .replace(/^[a-z_]+["':\s]+/i, "")
+              .replace(/,\s*[a-z_]+["':\s]+/gi, ", ");
             let display = raw;
             if (assessment.verdict === "OVER_BUDGET") {
               // Strip any existing $ + commas, reformat with $ + commas

@@ -405,10 +405,11 @@ export function GoldilocksApp() {
             )}
 
             {isLoading && assessmentsCount > 0 && (
-              <div className="mt-8 flex items-center justify-between border-t border-[color:var(--rule-quiet)] pt-4">
+              <div className="mt-8 grid grid-cols-[3rem_1fr_auto] items-center gap-x-3 border-t border-[color:var(--rule-quiet)] pt-4">
                 <span className="cited-quiet tabular text-xs">
                   {assessmentsCount} / {CORPUS_SIZE}
                 </span>
+                <span aria-hidden />
                 <button
                   type="button"
                   onClick={stop}
