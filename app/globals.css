@@ -1,0 +1,130 @@
+@import "tailwindcss";
+
+/* ============================================
+   Goldilocks — design tokens
+   LIGHT editorial theme, warm-tinted neutrals,
+   ember accent, forest verdict. Apartamento × Linear.
+   Numbers ARE the brand.
+   ============================================ */
+
+:root {
+  /* Surfaces — warm off-white (NOT pure white, avoids OLED bloom + compresses cleanly) */
+  --paper: oklch(0.975 0.010 75);            /* page background — warm cream */
+  --paper-raised: oklch(0.990 0.006 75);     /* cards lifted from paper */
+  --paper-recessed: oklch(0.950 0.012 75);   /* hover, secondary surfaces */
+  --rule-quiet: oklch(0.88 0.010 75);        /* hairline dividers */
+  --rule-loud: oklch(0.75 0.014 75);         /* emphasis dividers */
+
+  /* Type — deep warm charcoal, NEVER pure black */
+  --ink: oklch(0.20 0.014 60);               /* primary text */
+  --ink-soft: oklch(0.40 0.012 60);          /* secondary text */
+  --ink-quiet: oklch(0.58 0.012 60);         /* labels, eyebrows */
+  --ink-whisper: oklch(0.72 0.010 75);       /* very subtle text */
+
+  /* Ember — Wayfair orange tuned for light bg (slightly darker for contrast) */
+  --ember: oklch(0.58 0.18 35);
+  --ember-deep: oklch(0.50 0.20 35);
+  --ember-tint: oklch(0.58 0.18 35 / 0.10);
+  --ember-edge: oklch(0.58 0.18 35 / 0.30);
+
+  /* Verdict palette — warm-aligned forest/terracotta/ochre, not generic alert system */
+  --right: oklch(0.42 0.13 145);             /* deep forest green — gravitas */
+  --right-edge: oklch(0.42 0.13 145 / 0.40);
+  --right-tint: oklch(0.42 0.13 145 / 0.06);
+  --right-glow: oklch(0.55 0.15 145 / 0.18);
+
+  --reject: oklch(0.50 0.13 28);             /* muted terracotta — not alarm */
+  --reject-edge: oklch(0.50 0.13 28 / 0.30);
+  --reject-tint: oklch(0.50 0.13 28 / 0.05);
+
+  --maybe: oklch(0.55 0.13 75);              /* warm ochre */
+  --maybe-edge: oklch(0.55 0.13 75 / 0.35);
+  --maybe-tint: oklch(0.55 0.13 75 / 0.06);
+
+  /* Fluid type for editorial moments; fixed for UI */
+  --display-xl: clamp(2.75rem, 5vw + 1rem, 5.5rem);
+  --display-lg: clamp(2rem, 3vw + 1rem, 3.25rem);
+  --eyebrow: 0.6875rem;
+}
+
+@theme {
+  --font-display: var(--font-display), Georgia, ui-serif, serif;
+  --font-sans: var(--font-sans), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, monospace;
+
+  --color-paper: var(--paper);
+  --color-paper-raised: var(--paper-raised);
+  --color-paper-recessed: var(--paper-recessed);
+  --color-rule-quiet: var(--rule-quiet);
+  --color-rule-loud: var(--rule-loud);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-quiet: var(--ink-quiet);
+  --color-ink-whisper: var(--ink-whisper);
+  --color-ember: var(--ember);
+  --color-ember-deep: var(--ember-deep);
+  --color-right: var(--right);
+  --color-reject: var(--reject);
+  --color-maybe: var(--maybe);
+}
+
+html, body { background: var(--paper); }
+
+body {
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11";
+  text-rendering: optimizeLegibility;
+}
+
+/* Tabular figures for any numeric data — clean alignment without going mono everywhere */
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* Eyebrow: small caps, wide tracking — for section labels */
+.eyebrow {
+  font-family: var(--font-sans);
+  font-size: var(--eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-quiet);
+}
+
+/* The hero "this one" lockup — editorial pull-quote style */
+.lockup-display {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
+  color: var(--ink);
+}
+
+/* The cited number — JetBrains Mono, restrained, used sparingly */
+.cited {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--ink);
+}
+
+.cited-quiet {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  color: var(--ink-quiet);
+}
+
+/* Streaming reveal — gentle fade + slight rise as cards arrive */
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.reveal { animation: reveal 380ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* When match found, OTHER cards dim to 8% (the silence move) */
+.dimmed { opacity: 0.18; transition: opacity 600ms ease-out; }
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .dimmed { animation: none; transition: none; }
+}

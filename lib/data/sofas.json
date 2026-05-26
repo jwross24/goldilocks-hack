@@ -1,0 +1,207 @@
+{
+  "_meta": {
+    "purpose": "AccessiShop demo product corpus — real Wayfair sofas with real dimensions",
+    "captured": "2026-05-26 via exa search",
+    "use": "Paste into app at minute 5. Agent reasons over these 8 against Maya's accessibility constraints.",
+    "transfer_range_target": "17-19 inches seat height for self-transfer from wheelchair"
+  },
+  "personas": [
+    {
+      "id": "maya",
+      "name": "Maya",
+      "age": 47,
+      "mobility_aid": "manual wheelchair",
+      "transfer_strategy": "self-transfer using armrest leverage",
+      "constraints": {
+        "seat_height_in": { "min": 17, "max": 19, "rationale": "ADA transfer range; lower = hard to push up from, higher = hard to slide onto laterally" },
+        "max_seat_depth_in": 28,
+        "armrest_required": true,
+        "firm_cushion_preferred": true,
+        "max_budget_usd": 800,
+        "delivery_preference": "white-glove (cannot move heavy furniture)"
+      },
+      "context_for_agent": "Last apartment had a deep-seat sectional Maya couldn't get out of independently. She wants confidence she can use what she buys."
+    },
+    {
+      "id": "carlos",
+      "name": "Carlos",
+      "age": 52,
+      "mobility_aid": "post-fusion lumbar (L4-L5)",
+      "transfer_strategy": "stand-up from seated, no twist",
+      "constraints": {
+        "seat_height_in": { "min": 19, "max": 22, "rationale": "Below 19 strains lumbar on standing; above 22 dangles feet and shifts pelvis" },
+        "max_seat_depth_in": 22,
+        "armrest_required": false,
+        "firm_cushion_preferred": true,
+        "max_budget_usd": 1000,
+        "delivery_preference": "white-glove (cannot lift heavy)"
+      },
+      "context_for_agent": "L4-L5 fusion 18 months ago. Cleared for daily activity but soft cushions flare his back within ten minutes. Works from a sit-stand desk; the sofa is the evening rest space."
+    },
+    {
+      "id": "eleanor",
+      "name": "Eleanor",
+      "age": 75,
+      "mobility_aid": "single-point cane; arthritis (hands + knees)",
+      "transfer_strategy": "armrest-assisted stand from seated",
+      "constraints": {
+        "seat_height_in": { "min": 18, "max": 20, "rationale": "Below 18 strains knees on standing; above 20 dangles feet" },
+        "max_seat_depth_in": 22,
+        "armrest_required": true,
+        "firm_cushion_preferred": true,
+        "max_budget_usd": 1200,
+        "delivery_preference": "white-glove (cannot move heavy)"
+      },
+      "context_for_agent": "Lives independently. Reads three hours a day. Last upholstered chair sank too soft and she struggled to stand without help. Wants to keep her independence."
+    }
+  ],
+  "maya_persona": {
+    "name": "Maya",
+    "age": 47,
+    "mobility_aid": "manual wheelchair",
+    "transfer_strategy": "self-transfer using armrest leverage",
+    "constraints": {
+      "seat_height_in": { "min": 17, "max": 19, "rationale": "ADA transfer range; lower = hard to push up from, higher = hard to slide onto" },
+      "max_seat_depth_in": 28,
+      "armrest_required": true,
+      "firm_cushion_preferred": true,
+      "max_budget_usd": 800,
+      "delivery_preference": "white-glove (cannot move heavy furniture)"
+    },
+    "context_for_agent": "Last apartment had a deep-seat sectional Maya couldn't get out of independently. She wants confidence she can use what she buys."
+  },
+  "sofas": [
+    {
+      "id": "wrought-studio-arnya",
+      "name": "Wrought Studio™ Arnya MINIMORE Modern Style Sofa",
+      "url": "https://www.wayfair.com/furniture/pdp/wrought-studio-arnya-889-minimore-modern-style-sofa-w009459675.html",
+      "price_usd": 720,
+      "seat_height_in": 15.74,
+      "seat_depth_in": 26,
+      "overall_dim": "29\" H x 88.9\" W x 37\" D",
+      "construction": "Solid + engineered wood frame, foam + pocket springs, chrome metal legs, rounded arms, tight back",
+      "expected_verdict": "REJECT — seat height 15.74\" is below transfer range",
+      "cushion_firmness": "firm (reviews mention 'a little hard but good for lumbar')"
+    },
+    {
+      "id": "red-barrel-lourdez",
+      "name": "Red Barrel Studio® Lourdez 78.7'' Upholstered Sofa",
+      "url": "https://www.wayfair.com/furniture/pdp/red-barrel-studio-lourdez-803-curved-arm-tufted-back-sofa-zpcd7465.html",
+      "price_usd": 269.99,
+      "seat_height_in": 18.5,
+      "seat_depth_in": 20.5,
+      "construction": "Solid eucalyptus wood frame, high-density foam + coil springs, tapered black legs, flared arms, tufted back",
+      "expected_verdict": "PASS — seat height 18.5\" is within transfer range; shallow seat depth (20.5\") supports forward edge perching; high-density foam stays firm",
+      "cushion_firmness": "firm (high-density foam)"
+    },
+    {
+      "id": "serta-copenhagen",
+      "name": "Serta Copenhagen 78\" Rolled Arm Sofa",
+      "url": "https://www.wayfair.com/furniture/pdp/serta-copenhagen-78-rolled-arm-sofa-easy-care-fabric-soft-pillow-back-pocket-coil-seat-cushions-uxif3378.html",
+      "price_usd": null,
+      "price_note": "needs lookup",
+      "seat_height_in": 15,
+      "overall_dim": "78\" W x 33\" D x 36\" H",
+      "expected_verdict": "REJECT — seat height 15\" is well below transfer range",
+      "fit_note": "Marketed for 'users under 6ft' — short-body design"
+    },
+    {
+      "id": "serta-palisades",
+      "name": "Serta Palisades 78\" Track Arm Sofa",
+      "url": "https://www.wayfair.com/furniture/pdp/serta-palisades-78-track-arm-sofa-easy-care-fabric-soft-pillow-back-pocket-coil-seat-cushions-sert1165.html",
+      "price_usd": null,
+      "price_note": "needs lookup",
+      "seat_height_in": 20,
+      "seat_depth_in": 20.5,
+      "construction": "Pocket coil seat cushions, soft pillow back, track arm, high-density Serta foam, anti-pilling polyester",
+      "expected_verdict": "PASS but borderline — seat height 20\" is at the high edge of transfer range; firm-supportive pocket coil seat",
+      "cushion_firmness": "medium-firm with semi-plush sit"
+    },
+    {
+      "id": "zoe-87",
+      "name": "Zoe 87.5\"W Three-Seat Sofa",
+      "url": "https://www.wayfair.com/furniture/pdp/zoe-875-w-three-seat-sofa-classic-design-comfortable-and-durable-modern-home-zeaa1073.html",
+      "price_usd": null,
+      "price_note": "needs lookup",
+      "seat_height_in": 18.2,
+      "seat_depth_in": 22.9,
+      "overall_dim": "33.9\" H x 87.5\" W x 33.9\" D",
+      "arm_height_in": 23.7,
+      "weight_capacity_lbs": 800,
+      "expected_verdict": "STRONG PASS — seat height 18.2\" centered in transfer range; arm height 23.7\" provides leverage; 800 lb weight capacity supports transfer load",
+      "warning": "Cushions are compressed/vacuum-packed; need 48-72 hours to regain full firmness"
+    },
+    {
+      "id": "settab-loveseat",
+      "name": "Settab Loveseat Sofa (Modular Couch with Deep Seat Memory Foam)",
+      "url": "https://www.wayfair.com/furniture/pdp/settab-loveseat-sofamodular-couch-with-deep-seat-memory-foamcomfy-small-cloud-couch-for-small-spacesno-assembly-sofa-for-living-room-bedroomapartment-spta1026.html",
+      "price_usd": 299,
+      "seat_height_in": 25.2,
+      "seat_depth_in": 35.4,
+      "construction": "Memory foam, vacuum-packed, no-assembly",
+      "expected_verdict": "REJECT — seat height 25.2\" is far above transfer range; memory foam too sink-prone; depth 35.4\" prevents forward perching"
+    },
+    {
+      "id": "canora-grey-jay",
+      "name": "VLR Jay Upholstered Sofa (Canora Grey)",
+      "url": "https://www.wayfair.com/furniture/pdp/canora-grey-jay-upholstered-sofa-vraa5721.html",
+      "price_usd": 1429.99,
+      "seat_height_in": 20,
+      "seat_depth_in": 22,
+      "overall_dim": "36\" H x 89\" W x 38\" D",
+      "expected_verdict": "REJECT — over budget ($800 cap)"
+    },
+    {
+      "id": "ivy-bronx-janihya",
+      "name": "Ivy Bronx Janihya 80\" Upholstered Sofa",
+      "url": "https://www.wayfair.com/furniture/pdp/ivy-bronx-janihya-80-upholstered-sofa-w100735386.html",
+      "price_usd": null,
+      "price_note": "needs lookup",
+      "seat_height_in": 18,
+      "seat_depth_in": 31,
+      "overall_dim": "31\" H x 80\" W x 31\" D",
+      "expected_verdict": "BORDERLINE — seat height 18\" in transfer range, but depth 31\" is too deep for forward-edge perching; agent should flag this tradeoff",
+      "construction": "Modern track arm, brass metal legs, reversible seat cushion"
+    },
+    {
+      "id": "house-of-hampton-william-street",
+      "name": "House of Hampton® William Street Flared Arm Sofa",
+      "url": "https://www.wayfair.com/furniture/pdp/house-of-hampton-william-street-flared-arm-sofa-w002344018.html",
+      "price_usd": 103.99,
+      "price_note": "price suspicious — likely accessory, verify at minute 5",
+      "seat_height_in": 18.3,
+      "seat_depth_in": 20.27,
+      "arm_height_in": 19.69,
+      "overall_dim": "33.46\" H x 80.31\" W x 30.32\" D",
+      "construction": "Manufactured wood frame, foam, medium-firm cushion, sloped arms, mid-century curved arm",
+      "expected_verdict": "PASS — seat height 18.3\" in transfer range; shallow depth 20.27\"; medium-firm cushion"
+    }
+  ],
+  "expected_agent_top_3": [
+    {
+      "rank": 1,
+      "id": "zoe-87",
+      "reasoning": "Best overall fit. Seat 18.2\" centers Maya's transfer range. Arm height 23.7\" gives excellent leverage. 800 lb capacity. Caveat: 72hr decompression note."
+    },
+    {
+      "rank": 2,
+      "id": "red-barrel-lourdez",
+      "reasoning": "Most budget-friendly pass ($270). Seat 18.5\" in transfer range; shallow 20.5\" depth ideal for forward perching. Firm foam stays supportive."
+    },
+    {
+      "rank": 3,
+      "id": "house-of-hampton-william-street",
+      "reasoning": "Seat 18.3\" centered in range, shallow depth, medium-firm cushion. Verify price at purchase."
+    }
+  ],
+  "expected_agent_rejected": [
+    { "id": "wrought-studio-arnya", "reason": "seat too low (15.74\")" },
+    { "id": "serta-copenhagen", "reason": "seat too low (15\")" },
+    { "id": "settab-loveseat", "reason": "seat too high (25.2\") + sink-prone memory foam" },
+    { "id": "canora-grey-jay", "reason": "over budget ($1,429.99 vs $800 cap)" }
+  ],
+  "expected_agent_borderline": [
+    { "id": "serta-palisades", "reason": "seat 20\" at upper edge of transfer range" },
+    { "id": "ivy-bronx-janihya", "reason": "seat height OK, depth 31\" too deep" }
+  ]
+}
