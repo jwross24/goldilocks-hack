@@ -24,6 +24,7 @@ const FOCUS_RING =
 export function GoldilocksApp() {
   const [personaId, setPersonaId] = useState("maya");
   const [customPersona, setCustomPersona] = useState<Persona | null>(null);
+  const [draftPersona, setDraftPersona] = useState<Persona | null>(null);
   const [showCustomForm, setShowCustomForm] = useState(false);
   // Track which persona the current results belong to.
   // If user switches persona, we hide stale results until they hit Run again.
@@ -84,10 +85,9 @@ export function GoldilocksApp() {
     setCriticSnap(null);
     setSynthesisReply(null);
     setSynthesisPickId(null);
-    const key = isCustomActive ? `__custom:${persona.name}` : personaId;
     if (isLoading) stop();
-    lastSubmittedKey.current = key;
-    setResultsForPersonaId(key);
+    lastSubmittedKey.current = personaId;
+    setResultsForPersonaId(personaId);
     setShowCustomForm(false);
     submit({
       personaId: isCustomActive ? "__custom" : personaId,
@@ -97,11 +97,13 @@ export function GoldilocksApp() {
   };
 
   const handlePersonaSwitch = (id: string) => {
+    // Always close the custom form when switching personas, even if the same
+    // preset was already selected — the form may be open with a stale id.
+    setShowCustomForm(false);
+    setDraftPersona(null);
     if (id === personaId) return;
     if (isLoading) stop();
     setPersonaId(id);
-    setShowCustomForm(false);
-    // Results from previous persona are hidden by `showResults` gate.
   };
 
   const handleCustomTabClick = () => {
@@ -154,7 +156,7 @@ export function GoldilocksApp() {
           >
             <li className="eyebrow shrink-0">Customers</li>
             {personas.map((p, i) => {
-              const active = p.id === personaId;
+              const active = p.id === personaId && !showCustomForm;
               return (
                 <li key={p.id} className="shrink-0">
                   <button
@@ -186,9 +188,9 @@ export function GoldilocksApp() {
               <button
                 type="button"
                 onClick={handleCustomTabClick}
-                aria-current={isCustomActive ? "page" : undefined}
+                aria-current={isCustomActive || showCustomForm ? "page" : undefined}
                 className={`group inline-flex items-baseline gap-2 transition ${FOCUS_RING} ${
-                  isCustomActive
+                  isCustomActive || showCustomForm
                     ? "text-[color:var(--ink)]"
                     : "text-[color:var(--ink-quiet)] hover:text-[color:var(--ink)]"
                 }`}
@@ -196,7 +198,9 @@ export function GoldilocksApp() {
                 <span className="cited-quiet tabular text-xs">+</span>
                 <span
                   className={`font-display text-[1.0625rem] italic leading-none tracking-tight ${
-                    isCustomActive ? "text-[color:var(--ember-deep)]" : ""
+                    isCustomActive || showCustomForm
+                      ? "text-[color:var(--ember-deep)]"
+                      : ""
                   }`}
                 >
                   {customPersona?.name ?? "You"}
@@ -210,7 +214,26 @@ export function GoldilocksApp() {
       <main className="mx-auto max-w-6xl px-6 py-12 sm:px-10">
         <div className="grid gap-12 lg:grid-cols-[280px_1fr] lg:gap-16">
           <aside className="space-y-8 lg:sticky lg:top-12 lg:self-start">
-            <PersonaCard persona={persona} />
+            {showCustomForm ? (
+              draftPersona ? (
+                <>
+                  <PersonaCard persona={draftPersona} />
+                  <p className="cited-quiet -mt-4 text-[0.6875rem] italic text-[color:var(--ember-deep)]">
+                    Live preview &mdash; updates as you type.
+                  </p>
+                </>
+              ) : (
+                <section className="border-t border-[color:var(--rule-quiet)] pt-6">
+                  <p className="eyebrow mb-2">Live preview</p>
+                  <p className="font-display text-[1.25rem] italic leading-snug text-[color:var(--ink-soft)]">
+                    Describe yourself, or fill the fields. Your customer
+                    profile composes itself here.
+                  </p>
+                </section>
+              )
+            ) : (
+              <PersonaCard persona={persona} />
+            )}
 
             {effectiveReply && matchSettled && (
               <section className="border-t border-[color:var(--rule-quiet)] pt-6">
@@ -246,7 +269,11 @@ export function GoldilocksApp() {
             {showCustomForm && (
               <CustomPersonaForm
                 onSubmit={handleCustomSubmit}
-                onCancel={() => setShowCustomForm(false)}
+                onCancel={() => {
+                  setShowCustomForm(false);
+                  setDraftPersona(null);
+                }}
+                onDraftChange={setDraftPersona}
               />
             )}
 
