@@ -332,7 +332,7 @@ export function GoldilocksApp() {
               </div>
             )}
 
-            {assessmentsCount > 0 && (
+            {!showCustomForm && assessmentsCount > 0 && (
               <>
                 <p className="eyebrow mb-2">The corpus</p>
                 <p className="font-display text-[1.5rem] italic leading-tight text-[color:var(--ink-soft)]">
@@ -381,7 +381,7 @@ export function GoldilocksApp() {
               </>
             )}
 
-            <TopPicksList topPicks={topPicks as never} />
+            {!showCustomForm && <TopPicksList topPicks={topPicks as never} />}
 
             {matchSettled && pickId && criticSnap?.settled && (
               <SynthesisCard

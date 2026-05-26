@@ -159,13 +159,17 @@ body {
 
 /* When match found, OTHER cards dim (the silence move).
    `!important` overrides the `.reveal` keyframe's `both`-fill-mode end state.
-   Hover restores full opacity so the user can still inspect rejections. */
+   Hover restores full opacity so the user can still inspect rejections —
+   different transition speeds for in vs. out: snappy on hover-in (museum
+   spotlight), slower on hover-out (returns to the silence). */
 .dimmed {
   opacity: 0.18 !important;
-  transition: opacity 280ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+  transition: opacity 600ms cubic-bezier(0.22, 1, 0.36, 1) !important;
 }
-.dimmed:hover {
+.dimmed:hover,
+.dimmed:focus-within {
   opacity: 1 !important;
+  transition: opacity 180ms ease-out !important;
 }
 
 /* Respect reduced motion */
