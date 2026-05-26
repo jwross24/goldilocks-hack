@@ -81,19 +81,28 @@ export function GoldilocksApp() {
   const effectivePickId = synthesisPickId ?? pickId;
 
   const lastSubmittedKey = useRef<string | null>(null);
-  const handleRun = () => {
+  // Internal runner that takes the persona explicitly — used both by the
+  // header Run button (reads current state) and by handleCustomSubmit
+  // (which has a fresh persona that hasn't propagated through state yet).
+  const runForPersona = (p: Persona, isCustom: boolean) => {
     setCriticSnap(null);
     setSynthesisReply(null);
     setSynthesisPickId(null);
     if (isLoading) stop();
-    lastSubmittedKey.current = personaId;
-    setResultsForPersonaId(personaId);
+    const key = isCustom ? "__custom" : p.id;
+    lastSubmittedKey.current = key;
+    setResultsForPersonaId(key);
     setShowCustomForm(false);
+    setDraftPersona(null);
     submit({
-      personaId: isCustomActive ? "__custom" : personaId,
-      customPersona: isCustomActive ? persona : undefined,
-      query: `Find ${persona.name} their just-right sofa from the corpus.`,
+      personaId: isCustom ? "__custom" : p.id,
+      customPersona: isCustom ? p : undefined,
+      query: `Find ${p.name} their just-right sofa from the corpus.`,
     });
+  };
+
+  const handleRun = () => {
+    runForPersona(persona, isCustomActive);
   };
 
   const handlePersonaSwitch = (id: string) => {
@@ -118,7 +127,8 @@ export function GoldilocksApp() {
   const handleCustomSubmit = (p: Persona) => {
     setCustomPersona(p);
     setPersonaId("__custom");
-    setShowCustomForm(false);
+    // Run immediately — one click, no extra confirmation.
+    runForPersona(p, true);
   };
 
   return (
