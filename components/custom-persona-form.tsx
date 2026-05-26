@@ -32,11 +32,16 @@ function buildPersona(
   ) {
     return null;
   }
+  const trimmedContext = context.trim();
   return {
     id: `custom-${name.toLowerCase().replace(/\s+/g, "-")}`,
     name: name.trim(),
     age: age ? Number(age) : 0,
-    mobility_aid: "custom",
+    mobility_aid: trimmedContext
+      ? trimmedContext.length > 60
+        ? trimmedContext.slice(0, 60) + "…"
+        : trimmedContext
+      : "self-described",
     transfer_strategy: "as described",
     constraints: {
       seat_height_in: {

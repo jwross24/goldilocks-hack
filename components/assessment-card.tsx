@@ -165,7 +165,24 @@ export function AssessmentCard({
       )}
 
       {isMatch && (
-        <div className="mt-6">
+        <div className="mt-8">
+          {/* The brand thesis at peak: the number IS the typography. */}
+          {assessment.cited_value && (() => {
+            const numMatch = assessment.cited_value.match(/(\d+(?:\.\d+)?)/);
+            if (!numMatch) return null;
+            return (
+              <div className="mb-2 flex items-baseline gap-4">
+                <span className="cited tabular text-[var(--display-xl)] font-medium leading-none text-[color:var(--ember-deep)]">
+                  {numMatch[1]}
+                  <span className="not-italic">″</span>
+                </span>
+                <span className="eyebrow">
+                  centered in your {persona.constraints.seat_height_in.min}–
+                  {persona.constraints.seat_height_in.max}″ range
+                </span>
+              </div>
+            );
+          })()}
           <p className="lockup-display text-[var(--display-lg)]">
             {persona.name}, this one.
           </p>

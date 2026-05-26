@@ -92,12 +92,30 @@ export const GoldilocksOutputSchema = z.object({
 
 export type GoldilocksOutput = z.infer<typeof GoldilocksOutputSchema>;
 
+// Strip annotation fields meant for my own verification — NEVER ship these to
+// the model. `expected_verdict` was Maya-specific test data and would
+// contaminate reasoning for other personas (e.g. "over budget ($800 cap)"
+// is true for Maya's $800 budget but wrong for Ben's $1,500).
+export function cleanSofa(s: Record<string, unknown>): Record<string, unknown> {
+  /* eslint-disable @typescript-eslint/no-unused-vars */
+  const {
+    expected_verdict,
+    price_note,
+    ...clean
+  } = s;
+  return clean;
+}
+
+/** Corpus with internal annotations stripped — safe to send to any model. */
+export const cleanCorpus = (
+  sofasData.sofas as Array<Record<string, unknown>>
+).map(cleanSofa);
+
 function buildSystemPrompt(persona: Persona): string {
   const lo = persona.constraints.seat_height_in.min;
   const hi = persona.constraints.seat_height_in.max;
   const maxDepth = persona.constraints.max_seat_depth_in;
   const budget = persona.constraints.max_budget_usd;
-
   return `You are Goldilocks — an AI shopping agent that finds furniture that's *just right* for each customer's body, budget, and home.
 
 ## The Customer
@@ -108,7 +126,7 @@ ${JSON.stringify(persona, null, 2)}
 
 You must assess EVERY ONE of these ${sofasData.sofas.length} sofas, in the order listed:
 
-${JSON.stringify(sofasData.sofas, null, 2)}
+${JSON.stringify(cleanCorpus, null, 2)}
 
 ## Reasoning Rules
 

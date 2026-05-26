@@ -133,8 +133,13 @@ body {
   transform-origin: center;
 }
 
-/* When match found, OTHER cards dim (the silence move) */
-.dimmed { opacity: 0.10; transition: opacity 800ms cubic-bezier(0.22, 1, 0.36, 1); }
+/* When match found, OTHER cards dim (the silence move).
+   `!important` overrides the `.reveal` keyframe's `both`-fill-mode end state
+   (which holds opacity: 1 after the entry animation completes). */
+.dimmed {
+  opacity: 0.12 !important;
+  transition: opacity 800ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
 
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {

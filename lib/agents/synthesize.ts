@@ -1,7 +1,7 @@
 import { streamObject } from "ai";
 import { z } from "zod";
 import { subconsciousModel } from "@/lib/subconscious";
-import { personasById, type Persona } from "@/lib/agents/goldilocks";
+import { personasById, type Persona, cleanCorpus, cleanSofa } from "@/lib/agents/goldilocks";
 import sofasData from "@/lib/data/sofas.json";
 
 /**
@@ -74,7 +74,7 @@ ${JSON.stringify(initialSofa, null, 2)}
 ${input.criticMissed ? `- Caveat the critic flagged: ${input.criticMissed}` : ""}
 
 ## The Product Corpus (in case you want to switch)
-${JSON.stringify(sofasData.sofas, null, 2)}
+${JSON.stringify(cleanCorpus, null, 2)}
 
 ## Your Decision
 

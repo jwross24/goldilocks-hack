@@ -1,7 +1,7 @@
 import { streamObject } from "ai";
 import { z } from "zod";
 import { basetenModel, BASETEN_MODEL_ID } from "@/lib/baseten";
-import { personasById, type Persona } from "@/lib/agents/goldilocks";
+import { personasById, type Persona, cleanCorpus, cleanSofa } from "@/lib/agents/goldilocks";
 import sofasData from "@/lib/data/sofas.json";
 
 /**
@@ -37,9 +37,10 @@ export const CritiqueSchema = z.object({
 export type Critique = z.infer<typeof CritiqueSchema>;
 
 function buildCritiquePrompt(persona: Persona, pickedSofaId: string) {
-  const sofa = (sofasData.sofas as Array<{ id: string }>).find(
+  const sofaRaw = (sofasData.sofas as Array<{ id: string }>).find(
     (s) => s.id === pickedSofaId,
   );
+  const sofa = sofaRaw ? cleanSofa(sofaRaw as Record<string, unknown>) : null;
   return `You are an INDEPENDENT second-opinion reviewer for a furniture-fit shopping agent.
 
 A different model (Subconscious TIM) just selected the following sofa for this customer:
@@ -51,7 +52,7 @@ ${JSON.stringify(persona, null, 2)}
 ${JSON.stringify(sofa, null, 2)}
 
 ## Full Product Corpus (the alternatives the first model considered)
-${JSON.stringify(sofasData.sofas, null, 2)}
+${JSON.stringify(cleanCorpus, null, 2)}
 
 ## Your Job
 
@@ -61,7 +62,9 @@ Independently assess whether the rank-1 pick is correct for THIS customer.
 - AGREE_WITH_CAVEAT: the pick is reasonable but there's a meaningful caveat the first model didn't surface (e.g. compression note on cushions, suspicious price, depth borderline). Name it.
 - DISAGREE: a different sofa from the corpus would have been a better fit. Name which one and why.
 
-Be honest, not polite. If the first model missed something important about THIS customer's specific body or constraints, say so.
+Be honest. Politeness is optional. If the first model missed something important about THIS customer's specific body or constraints, say so.
+
+When citing constraints in user-facing text, use natural language ("the $1,500 budget", "the 20-inch transfer range") — NEVER raw JSON field names like "max_budget_usd" or "seat_height_in". The reader is a customer, not an engineer.
 
 Set reviewer_model to exactly: "${BASETEN_MODEL_ID}"
 
