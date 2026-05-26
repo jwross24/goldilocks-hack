@@ -19,7 +19,7 @@
   --ink: oklch(0.20 0.014 60);               /* primary text */
   --ink-soft: oklch(0.40 0.012 60);          /* secondary text */
   --ink-quiet: oklch(0.58 0.012 60);         /* labels, eyebrows */
-  --ink-whisper: oklch(0.72 0.010 75);       /* very subtle text */
+  --ink-whisper: oklch(0.55 0.012 60);       /* very subtle text (WCAG AA 4.7:1 on paper) */
 
   /* Ember — Wayfair orange tuned for light bg (slightly darker for contrast) */
   --ember: oklch(0.58 0.18 35);
@@ -121,8 +121,8 @@ body {
 }
 .reveal { animation: reveal 380ms cubic-bezier(0.22, 1, 0.36, 1) both; }
 
-/* When match found, OTHER cards dim to 8% (the silence move) */
-.dimmed { opacity: 0.18; transition: opacity 600ms ease-out; }
+/* When match found, OTHER cards dim (the silence move) */
+.dimmed { opacity: 0.10; transition: opacity 800ms cubic-bezier(0.22, 1, 0.36, 1); }
 
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {

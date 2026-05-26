@@ -22,8 +22,10 @@ export async function POST(request: Request) {
   const userQuery: string =
     body?.query ??
     "Find this customer their just-right sofa from the corpus.";
-  const personaId: string = typeof body?.personaId === "string" ? body.personaId : "maya";
+  const personaId: string =
+    typeof body?.personaId === "string" ? body.personaId : "maya";
+  const customPersona = body?.customPersona;
 
-  const result = streamGoldilocks(userQuery, personaId);
+  const result = streamGoldilocks(userQuery, personaId, customPersona);
   return result.toTextStreamResponse();
 }

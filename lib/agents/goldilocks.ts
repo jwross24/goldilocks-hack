@@ -45,26 +45,48 @@ export const AssessmentSchema = z.object({
     ),
 });
 
+export const TopPickSchema = z.object({
+  rank: z.number().describe("1, 2, or 3 — strictly ordered"),
+  sofa_id: z.string().describe("The id from the corpus, exactly"),
+  why_chosen: z
+    .string()
+    .describe(
+      "One sentence on why this sofa earned this rank for THIS customer",
+    ),
+  tradeoff: z
+    .string()
+    .describe(
+      "For rank 1: the one caveat (or 'none' if perfect). For rank 2-3: what this sofa gives up vs the rank above it. Be specific with numbers.",
+    ),
+});
+
 export const GoldilocksOutputSchema = z.object({
   assessments: z
     .array(AssessmentSchema)
     .describe(
       "Verdict for each sofa in the corpus. Output ALL sofas in the order they appear in the corpus.",
     ),
+  top_picks: z
+    .array(TopPickSchema)
+    .describe(
+      "The 1-3 best matches, ranked. Always include at least 1; up to 3 if multiple JUST_RIGHT or strong BORDERLINE candidates exist.",
+    ),
   pick: z.object({
     sofa_id: z
       .string()
-      .describe("The id of the best JUST_RIGHT match. Pick exactly one."),
+      .describe(
+        "The id of the rank-1 pick (same as top_picks[0].sofa_id). For UI backward compatibility.",
+      ),
     summary: z
       .string()
       .describe(
-        "One paragraph explaining why this sofa is the just-right pick for the customer",
+        "One paragraph explaining why the rank-1 sofa is the right call",
       ),
   }),
   drafted_reply: z
     .string()
     .describe(
-      "A 3-sentence message addressed to the customer by name, in second person. Warm but not patronizing. Mentions the pick and a key fit detail.",
+      "A 3-sentence message addressed to the customer by name, in second person. Warm but not patronizing. Mentions the rank-1 pick and a key fit detail.",
     ),
 });
 
@@ -84,7 +106,7 @@ ${JSON.stringify(persona, null, 2)}
 
 ## The Product Corpus
 
-You must assess EVERY ONE of these 8 sofas, in the order listed:
+You must assess EVERY ONE of these ${sofasData.sofas.length} sofas, in the order listed:
 
 ${JSON.stringify(sofasData.sofas, null, 2)}
 
@@ -101,7 +123,12 @@ This customer's seat-height comfort range is **${lo}–${hi} inches** (${persona
 
 For each sofa, cite the specific number (e.g. "seat height 15.74in", "price $1,429", "seat depth 31in"). Be honest — borderline cases should be marked BORDERLINE, not stretched to JUST_RIGHT.
 
-After assessing all 8, pick exactly ONE best JUST_RIGHT match. If multiple sofas pass, prefer the one with seat height closest to the center of the customer's range, then lowest price.
+After assessing all 8, identify the **top 1–3 picks** ranked by fit for this customer:
+- Rank 1 is the best overall. Prefer JUST_RIGHT over BORDERLINE. Among ties, prefer seat height closest to the center of the range, then lowest price.
+- Rank 2 (if a meaningful runner-up exists): the second-best option, with an explicit tradeoff vs rank 1 (e.g. "$450 cheaper but the depth is 2 inches deeper — forces forward perch").
+- Rank 3 (if a third candidate is genuinely viable): the third-best, with its tradeoff vs rank 2.
+
+Be honest. If only one sofa truly fits, only return one in top_picks. Don't pad. A short, honest list beats a long, hedged one.
 
 Draft a 3-sentence reply to the customer **by name**. Calm, specific, respectful. Never patronizing. Acknowledge what fits, briefly mention one key spec, close with confidence about delivery.
 
@@ -114,12 +141,16 @@ Return strict JSON matching the provided schema. No prose outside the JSON. No m
  * Stream Goldilocks reasoning for a specific persona. Returns a streamObject
  * result whose object shape matches GoldilocksOutputSchema. Each assessment
  * surfaces in the stream as TIM emits it.
+ *
+ * If `customPersona` is provided, it overrides the preset lookup.
  */
 export function streamGoldilocks(
   userQuery: string,
   personaId: string = "maya",
+  customPersona?: Persona,
 ) {
-  const persona = personasById[personaId] ?? mayaPersona;
+  const persona =
+    customPersona ?? personasById[personaId] ?? mayaPersona;
   return streamObject({
     model: subconsciousModel,
     schema: GoldilocksOutputSchema,

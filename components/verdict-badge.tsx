@@ -29,6 +29,7 @@ const TONE_DOT = {
 
 export function VerdictBadge({ verdict }: { verdict: Verdict }) {
   const meta = LABELS[verdict];
+  if (!meta) return null; // streaming may pass partial enum values before completion
   return (
     <span className="inline-flex items-center gap-2">
       <span

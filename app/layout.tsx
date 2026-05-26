@@ -38,7 +38,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${sourceSerif.variable} ${manrope.variable} ${jetBrainsMono.variable} h-full antialiased`}
-      style={{ colorScheme: "dark" }}
+      style={{ colorScheme: "light" }}
     >
       <body className="flex min-h-full flex-col">{children}</body>
     </html>

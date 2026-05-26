@@ -53,6 +53,38 @@
         "delivery_preference": "white-glove (cannot move heavy)"
       },
       "context_for_agent": "Lives independently. Reads three hours a day. Last upholstered chair sank too soft and she struggled to stand without help. Wants to keep her independence."
+    },
+    {
+      "id": "sam",
+      "name": "Sam",
+      "age": 34,
+      "mobility_aid": "tall frame (6'5\", 240 lb)",
+      "transfer_strategy": "fits a frame standard sofas weren't dimensioned for",
+      "constraints": {
+        "seat_height_in": { "min": 19, "max": 22, "rationale": "Below 19 puts his knees above his hips (uncomfortable, wrecks the back); above 22 lifts heels off the floor" },
+        "max_seat_depth_in": 32,
+        "armrest_required": false,
+        "firm_cushion_preferred": true,
+        "max_budget_usd": 1500,
+        "delivery_preference": "white-glove (oversized)"
+      },
+      "context_for_agent": "Software engineer. Three sofas in four years; all felt like child furniture and went back. His wife is done. Needs deeper-than-standard depth, a back that actually reaches his shoulder blades, and a verified weight rating he doesn't have to hope about."
+    },
+    {
+      "id": "priya",
+      "name": "Priya",
+      "age": 32,
+      "mobility_aid": "six weeks post-C-section",
+      "transfer_strategy": "gentle stand-up without engaging the abdominal incision",
+      "constraints": {
+        "seat_height_in": { "min": 18, "max": 20, "rationale": "Below 18 forces ab engagement to stand; above 20 makes feeding posture awkward" },
+        "max_seat_depth_in": 24,
+        "armrest_required": true,
+        "firm_cushion_preferred": true,
+        "max_budget_usd": 900,
+        "delivery_preference": "white-glove (cannot move heavy with incision restrictions)"
+      },
+      "context_for_agent": "First-time parent. Living room is recovery space and feeding space. Current sectional is too soft to push up from and too deep to hold the baby on a propped pillow. Needs firmness, shallow depth, armrest leverage, and material that survives spit-up."
     }
   ],
   "maya_persona": {

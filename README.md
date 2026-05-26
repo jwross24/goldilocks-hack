@@ -45,7 +45,7 @@ User query  ──▶  /api/goldilocks (Next.js route)
 - **App**: Next.js 16 + React 19 + TypeScript
 - **Styling**: Tailwind v4 with custom OKLCH design tokens
 - **Typography**: Source Serif 4 (display) · Manrope (body) · JetBrains Mono (data only)
-- **Hosting**: Cloudflare Pages compatible
+- **Critic**: [Baseten](https://baseten.co) (`gpt-oss-120b`) second-opinion validation
 
 ## Design philosophy
 
@@ -63,4 +63,4 @@ pnpm dev
 
 ## The team
 
-Solo build. Sponsored by Wayfair, Subconscious, Baseten, and Cloudflare.
+Solo build. Sponsored by Wayfair, Subconscious, and Baseten.

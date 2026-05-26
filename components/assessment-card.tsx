@@ -2,6 +2,14 @@
 
 import { VerdictBadge } from "./verdict-badge";
 import type { Persona } from "@/lib/agents/goldilocks";
+import sofasData from "@/lib/data/sofas.json";
+
+const sofaUrlById = Object.fromEntries(
+  (sofasData.sofas as Array<{ id: string; url?: string }>).map((s) => [
+    s.id,
+    s.url,
+  ]),
+);
 
 type Verdict =
   | "JUST_RIGHT"
@@ -22,13 +30,14 @@ export interface Assessment {
 /**
  * Extract the gap to the customer's range from cited_value.
  * The "measurement as respect" move — show how far off the rejected sofa is.
+ * Verdict drives semantics; cited_value just provides the number.
  */
 function extractGap(
   cited: string | undefined,
   verdict: Verdict | undefined,
   persona: Persona,
 ) {
-  if (!cited) return null;
+  if (!cited || !verdict) return null;
   const numMatch = cited.match(/(\d+(?:\.\d+)?)/);
   if (!numMatch) return null;
   const value = parseFloat(numMatch[1]);
@@ -36,24 +45,55 @@ function extractGap(
 
   const lo = persona.constraints.seat_height_in.min;
   const hi = persona.constraints.seat_height_in.max;
+  const maxDepth = persona.constraints.max_seat_depth_in;
+  const budget = persona.constraints.max_budget_usd;
 
-  if (verdict === "TOO_LOW" && /seat\s*height|height/i.test(cited)) {
-    const gap = lo - value;
-    return { gap: gap.toFixed(2), unit: "″", direction: "below range" };
-  }
-  if (verdict === "TOO_HIGH" && /seat\s*height|height/i.test(cited)) {
-    const gap = value - hi;
-    return { gap: gap.toFixed(2), unit: "″", direction: "above range" };
-  }
+  // OVER_BUDGET — value is a dollar amount
   if (verdict === "OVER_BUDGET") {
-    const budget = persona.constraints.max_budget_usd;
     const overBy = value - budget;
+    if (overBy <= 0) return null;
     return {
       gap: `$${Math.round(overBy).toLocaleString()}`,
       unit: "",
       direction: "over budget",
     };
   }
+
+  // TOO_LOW — value is a seat height below range
+  if (verdict === "TOO_LOW") {
+    const delta = lo - value;
+    if (delta <= 0) return null;
+    return {
+      gap: delta.toFixed(2),
+      unit: "″",
+      direction: "below range",
+    };
+  }
+
+  // TOO_HIGH — could be seat height above range, OR seat depth too deep.
+  // Disambiguate: if value > maxDepth+2 (well above any plausible height),
+  // it's a depth measurement; otherwise treat as height.
+  if (verdict === "TOO_HIGH") {
+    const heightOver = value - hi;
+    const depthOver = value - maxDepth;
+    // Prefer depth interpretation when value is clearly in depth range (>= 26in)
+    // and exceeds the customer's max depth.
+    if (value >= 26 && depthOver > 0) {
+      return {
+        gap: depthOver.toFixed(2),
+        unit: "″",
+        direction: "above max depth",
+      };
+    }
+    if (heightOver > 0) {
+      return {
+        gap: heightOver.toFixed(2),
+        unit: "″",
+        direction: "above range",
+      };
+    }
+  }
+
   return null;
 }
 
@@ -94,7 +134,9 @@ export function AssessmentCard({
             </p>
           )}
         </div>
-        {assessment.verdict && <VerdictBadge verdict={assessment.verdict} />}
+        {assessment.verdict && assessment.verdict in {JUST_RIGHT:0, TOO_LOW:0, TOO_HIGH:0, OVER_BUDGET:0, BORDERLINE:0} && (
+          <VerdictBadge verdict={assessment.verdict} />
+        )}
       </div>
 
       {assessment.primary_reason && (
@@ -127,6 +169,17 @@ export function AssessmentCard({
           <p className="lockup-display text-[var(--display-lg)]">
             {persona.name}, this one.
           </p>
+          {assessment.sofa_id && sofaUrlById[assessment.sofa_id] && (
+            <a
+              href={sofaUrlById[assessment.sofa_id]}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex items-baseline gap-2 text-sm text-[color:var(--ink)] underline decoration-[color:var(--ember-deep)] decoration-2 underline-offset-4 transition hover:text-[color:var(--ember-deep)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[color:var(--ember-deep)]"
+            >
+              Take {persona.name} to this sofa
+              <span aria-hidden>&rarr;</span>
+            </a>
+          )}
         </div>
       )}
     </article>
