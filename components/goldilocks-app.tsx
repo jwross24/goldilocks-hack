@@ -249,7 +249,7 @@ export function GoldilocksApp() {
               <section className="border-t border-[color:var(--rule-quiet)] pt-6">
                 <p className="eyebrow mb-3 text-[color:var(--right)]">
                   Goldilocks &rarr; {persona.name}
-                  {synthesisReply && (
+                  {synthesisReply && synthesisPickId && synthesisPickId !== pickId && (
                     <span className="ml-2 text-[color:var(--ember-deep)] normal-case tracking-normal">
                       (revised)
                     </span>

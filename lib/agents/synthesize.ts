@@ -84,7 +84,16 @@ Be honest. The second opinion may be right, partly right, or wrong. You can:
 - **CHANGE**: switch to a different sofa from the corpus. Use this if the critic identified a real disqualifier and another sofa is genuinely better. Pick the new sofa BY ID from the corpus.
 - **CONCEDE**: keep the original pick but explicitly acknowledge the critic's caveat in your reply to the customer. Use this when the caveat is real but the pick is still the best option.
 
-Then re-draft your message to the customer (3 sentences, by name, second person). The new reply should reflect your final stance honestly — if CHANGE, mention the new sofa and briefly why. If CONCEDE, name the caveat (e.g. "one note about delivery..."). If HOLD, defend without being defensive.
+Then re-draft your message to the customer (3 sentences, by name, second person). The new reply MUST be internally consistent with your decision:
+- If CHANGE: mention the NEW sofa by name and briefly why. Do NOT mention the original pick by name.
+- If CONCEDE: keep the original pick by name; name the caveat ("one note about delivery...") clearly.
+- If HOLD: defend the original pick without being defensive. Do NOT mention any other sofa.
+
+## Critical output rules
+
+- reconciliation_note is 1-2 SENTENCES MAX. Never include your internal reasoning trace, never say "Wait" or "Actually" or "let me re-evaluate", never enumerate sofas. Just a clean explanation of the final decision.
+- NEVER include raw JSON field names like 'firm_cushion_preferred', 'max_budget_usd', 'seat_height_in'. Use natural language ("firm cushion preference", "the $1,500 budget", "20-inch seat height").
+- The updated_reply must MATCH the decision. If decision is CHANGE, the reply must talk about the new sofa, not the old one.
 
 Return strict JSON matching the schema. No prose outside the JSON.`;
 }

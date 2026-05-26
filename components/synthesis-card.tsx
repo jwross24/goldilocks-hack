@@ -130,11 +130,21 @@ export function SynthesisCard({
             )}
           </p>
 
-          {object?.reconciliation_note && (
-            <p className="mt-3 max-w-[62ch] text-[0.9375rem] leading-relaxed text-[color:var(--ink)]">
-              {object.reconciliation_note}
-            </p>
-          )}
+          {object?.reconciliation_note && (() => {
+            // Trim chain-of-thought leakage: clip at first reasoning-tic word
+            // ("Wait", "Actually", "Let me", "Hmm") if it slipped in.
+            const raw = object.reconciliation_note;
+            const cotMarkers = /\s+(Wait|Actually|Let me|Hmm|Let's re-evaluate|Let's evaluate)\b/i;
+            const cleaned = raw.split(cotMarkers)[0].trim();
+            // Cap at 280 chars (≈ 2 sentences) as a safety net
+            const display =
+              cleaned.length > 280 ? cleaned.slice(0, 280) + "…" : cleaned;
+            return (
+              <p className="mt-3 max-w-[62ch] text-[0.9375rem] leading-relaxed text-[color:var(--ink)]">
+                {display}
+              </p>
+            );
+          })()}
         </div>
       )}
 
