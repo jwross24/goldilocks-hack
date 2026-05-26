@@ -18,6 +18,14 @@ type Verdict =
   | "OVER_BUDGET"
   | "BORDERLINE";
 
+const VALID_VERDICTS = new Set<Verdict>([
+  "JUST_RIGHT",
+  "TOO_LOW",
+  "TOO_HIGH",
+  "OVER_BUDGET",
+  "BORDERLINE",
+]);
+
 export interface Assessment {
   sofa_id?: string;
   sofa_name?: string;
@@ -135,7 +143,7 @@ export function AssessmentCard({
             </p>
           )}
         </div>
-        {assessment.verdict && assessment.verdict in {JUST_RIGHT:0, TOO_LOW:0, TOO_HIGH:0, OVER_BUDGET:0, BORDERLINE:0} && (
+        {assessment.verdict && VALID_VERDICTS.has(assessment.verdict) && (
           <VerdictBadge verdict={assessment.verdict} />
         )}
       </div>
@@ -167,6 +175,11 @@ export function AssessmentCard({
 
       {isMatch && (
         <div className="mt-8">
+          {/* Editorial register mark — a hairline draws in above the climax. */}
+          <span
+            aria-hidden
+            className="rule-draw mb-4 block h-px w-16 bg-[color:var(--ember-deep)]"
+          />
           {/* The brand thesis at peak: the number IS the typography. */}
           {assessment.cited_value && (() => {
             const numMatch = assessment.cited_value.match(/(\d+(?:\.\d+)?)/);

@@ -114,6 +114,27 @@ body {
   color: var(--ink-quiet);
 }
 
+/* Verdict-dot pulse — single ring expansion on arrival, then dies forever.
+   Letterpress confirmation of commit, not a looping status indicator. */
+@keyframes dot-pulse-once {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+.dot-pulse-once {
+  animation: dot-pulse-once 800ms ease-out both;
+}
+
+/* Hairline draws in from the left — used above the "JUST RIGHT" lockup
+   as the editorial register mark before the climax. */
+@keyframes rule-draw {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.rule-draw {
+  animation: rule-draw 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: left center;
+}
+
 /* Streaming reveal — gentle fade + slight rise as cards arrive.
    Cards stagger via inline `animation-delay` set per-index in the component,
    so reading the 9 verdicts feels like a magazine page composing, not a
@@ -137,11 +158,14 @@ body {
 }
 
 /* When match found, OTHER cards dim (the silence move).
-   `!important` overrides the `.reveal` keyframe's `both`-fill-mode end state
-   (which holds opacity: 1 after the entry animation completes). */
+   `!important` overrides the `.reveal` keyframe's `both`-fill-mode end state.
+   Hover restores full opacity so the user can still inspect rejections. */
 .dimmed {
-  opacity: 0.12 !important;
-  transition: opacity 800ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+  opacity: 0.18 !important;
+  transition: opacity 280ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+.dimmed:hover {
+  opacity: 1 !important;
 }
 
 /* Respect reduced motion */

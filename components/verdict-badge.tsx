@@ -32,10 +32,14 @@ export function VerdictBadge({ verdict }: { verdict: Verdict }) {
   if (!meta) return null; // streaming may pass partial enum values before completion
   return (
     <span className="inline-flex items-center gap-2">
-      <span
-        aria-hidden
-        className={`inline-block h-1.5 w-1.5 rounded-full ${TONE_DOT[meta.tone]}`}
-      />
+      <span aria-hidden className="relative inline-block h-1.5 w-1.5">
+        <span
+          className={`absolute inset-0 rounded-full ${TONE_DOT[meta.tone]}`}
+        />
+        <span
+          className={`dot-pulse-once absolute inset-0 rounded-full ${TONE_DOT[meta.tone]}`}
+        />
+      </span>
       <span className={`eyebrow ${TONE_TEXT[meta.tone]}`}>{meta.word}</span>
     </span>
   );
