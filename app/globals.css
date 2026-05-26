@@ -114,12 +114,15 @@ body {
   color: var(--ink-quiet);
 }
 
-/* Streaming reveal — gentle fade + slight rise as cards arrive */
+/* Streaming reveal — gentle fade + slight rise as cards arrive.
+   Cards stagger via inline `animation-delay` set per-index in the component,
+   so reading the 9 verdicts feels like a magazine page composing, not a
+   spreadsheet refreshing. */
 @keyframes reveal {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.reveal { animation: reveal 380ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.reveal { animation: reveal 420ms cubic-bezier(0.16, 1, 0.3, 1) both; }
 
 /* Loading breathing — for the prime mark ″ used as a heartbeat during waits */
 @keyframes prime-breathe {

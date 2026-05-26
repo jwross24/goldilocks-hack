@@ -114,6 +114,7 @@ export function AssessmentCard({
 
   return (
     <article
+      style={{ animationDelay: `${Math.min(index * 70, 560)}ms` }}
       className={`reveal border-t border-[color:var(--rule-quiet)] py-6 transition-opacity duration-500 ${
         isDimmed ? "dimmed" : ""
       }`}
