@@ -306,11 +306,17 @@ export function GoldilocksApp() {
               </div>
             )}
 
-            {isLoading && assessmentsCount === 0 && (
+            {!showCustomForm && isLoading && assessmentsCount === 0 && (
               <div className="border-t border-[color:var(--rule-loud)] pt-8">
                 <p className="eyebrow mb-2">In progress</p>
                 <p className="font-display text-[1.5rem] italic text-[color:var(--ink-soft)]">
-                  Measuring {CORPUS_SIZE} sofas.
+                  Measuring {CORPUS_SIZE} sofas
+                  <span
+                    aria-hidden
+                    className="prime-breathe ml-0.5 inline-block not-italic"
+                  >
+                    ″
+                  </span>
                 </p>
               </div>
             )}
@@ -319,9 +325,24 @@ export function GoldilocksApp() {
               <>
                 <p className="eyebrow mb-2">The corpus</p>
                 <p className="font-display text-[1.5rem] italic leading-tight text-[color:var(--ink-soft)]">
-                  {matchSettled
-                    ? `${assessmentsCount} measured. One fits.`
-                    : `${assessmentsCount} of ${CORPUS_SIZE} measured…`}
+                  {matchSettled ? (
+                    `${assessmentsCount} measured. One fits.`
+                  ) : (
+                    <>
+                      <span className="cited not-italic text-[color:var(--ink)]">
+                        {assessmentsCount}
+                      </span>{" "}
+                      of{" "}
+                      <span className="cited not-italic">{CORPUS_SIZE}</span>{" "}
+                      measured
+                      <span
+                        aria-hidden
+                        className="prime-breathe ml-0.5 inline-block not-italic"
+                      >
+                        ″
+                      </span>
+                    </>
+                  )}
                 </p>
 
                 <div className="mt-8">

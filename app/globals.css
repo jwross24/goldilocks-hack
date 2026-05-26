@@ -121,6 +121,13 @@ body {
 }
 .reveal { animation: reveal 380ms cubic-bezier(0.22, 1, 0.36, 1) both; }
 
+/* Loading breathing — for the prime mark ″ used as a heartbeat during waits */
+@keyframes prime-breathe {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 0.9; }
+}
+.prime-breathe { animation: prime-breathe 1.6s ease-in-out infinite; }
+
 /* When match found, OTHER cards dim (the silence move) */
 .dimmed { opacity: 0.10; transition: opacity 800ms cubic-bezier(0.22, 1, 0.36, 1); }
 
