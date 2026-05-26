@@ -175,14 +175,23 @@ export function AssessmentCard({
                 display = `$${num.toLocaleString()}`;
               }
             } else {
-              // Treat as inches measurement. Replace "in" with ″, or add ″
-              // if the value is bare digits.
+              // Treat as inches measurement — but only if the value looks
+              // plausibly like inches (< 100). Large bare numbers (e.g.
+              // 1429.99) are TIM mis-emitting a price into a non-budget
+              // verdict; don't slap ″ on them.
               display = raw
                 .replace(/\s*inches?\b/gi, "″")
                 .replace(/\s*in\b/gi, "″")
                 .replace(/\s*″\s*″/g, "″");
-              if (/^\d+(\.\d+)?$/.test(display.trim())) {
-                display = `${display.trim()}″`;
+              const trimmed = display.trim();
+              if (/^\d+(\.\d+)?$/.test(trimmed)) {
+                const val = parseFloat(trimmed);
+                if (!Number.isNaN(val) && val < 100) {
+                  display = `${trimmed}″`;
+                } else if (val >= 100) {
+                  // Probably a price TIM mis-attributed. Render with $ to be safe.
+                  display = `$${val.toLocaleString()}`;
+                }
               }
             }
             return (
