@@ -68,8 +68,13 @@ Set reviewer_model to exactly: "${BASETEN_MODEL_ID}"
 Return strict JSON matching the schema. No prose outside the JSON.`;
 }
 
-export function streamCritique(personaId: string, pickedSofaId: string) {
-  const persona = personasById[personaId] ?? personasById.maya;
+export function streamCritique(
+  personaId: string,
+  pickedSofaId: string,
+  customPersona?: Persona,
+) {
+  const persona =
+    customPersona ?? personasById[personaId] ?? personasById.maya;
   return streamObject({
     model: basetenModel,
     schema: CritiqueSchema,

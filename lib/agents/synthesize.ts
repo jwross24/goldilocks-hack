@@ -49,6 +49,7 @@ interface SynthesisInput {
   criticVerdict: "AGREE" | "AGREE_WITH_CAVEAT" | "DISAGREE";
   criticReasoning: string;
   criticMissed: string | null;
+  customPersona?: Persona;
 }
 
 function buildPrompt(input: SynthesisInput, persona: Persona) {
@@ -89,7 +90,10 @@ Return strict JSON matching the schema. No prose outside the JSON.`;
 }
 
 export function streamSynthesis(input: SynthesisInput) {
-  const persona = personasById[input.personaId] ?? personasById.maya;
+  const persona =
+    input.customPersona ??
+    personasById[input.personaId] ??
+    personasById.maya;
   return streamObject({
     model: subconsciousModel,
     schema: SynthesisOutputSchema,

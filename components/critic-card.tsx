@@ -3,6 +3,7 @@
 import { experimental_useObject as useObject } from "@ai-sdk/react";
 import { useEffect, useRef } from "react";
 import { CritiqueSchema } from "@/lib/agents/critic";
+import type { Persona } from "@/lib/agents/goldilocks";
 
 const VERDICT_TEXT = {
   AGREE: "Agree",
@@ -36,10 +37,12 @@ export interface CriticSnapshot {
 export function CriticCard({
   personaId,
   pickedSofaId,
+  customPersona,
   onSnapshot,
 }: {
   personaId: string;
   pickedSofaId: string | undefined;
+  customPersona?: Persona | null;
   onSnapshot?: (snap: CriticSnapshot) => void;
 }) {
   const { object, submit, isLoading, error, stop } = useObject({
@@ -55,7 +58,11 @@ export function CriticCard({
     if (key === lastKey.current) return;
     if (isLoading) stop();
     lastKey.current = key;
-    submit({ personaId, pickedSofaId });
+    submit({
+      personaId,
+      pickedSofaId,
+      customPersona: customPersona ?? undefined,
+    });
     return () => {
       // Cleanup: abort if unmounting mid-stream
       if (isLoading) stop();

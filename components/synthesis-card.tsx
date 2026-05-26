@@ -3,6 +3,7 @@
 import { experimental_useObject as useObject } from "@ai-sdk/react";
 import { useEffect, useRef } from "react";
 import { SynthesisOutputSchema } from "@/lib/agents/synthesize";
+import type { Persona } from "@/lib/agents/goldilocks";
 import sofasData from "@/lib/data/sofas.json";
 
 const sofaIndex = Object.fromEntries(
@@ -30,6 +31,7 @@ const isDecision = (v: unknown): v is DecisionKey =>
 
 interface SynthesisCardProps {
   personaId: string;
+  customPersona?: Persona | null;
   initialPickId: string | undefined;
   initialReply: string | undefined;
   criticVerdict: "AGREE" | "AGREE_WITH_CAVEAT" | "DISAGREE" | undefined;
@@ -41,6 +43,7 @@ interface SynthesisCardProps {
 
 export function SynthesisCard({
   personaId,
+  customPersona,
   initialPickId,
   initialReply,
   criticVerdict,
@@ -71,6 +74,7 @@ export function SynthesisCard({
     lastKey.current = key;
     submit({
       personaId,
+      customPersona: customPersona ?? undefined,
       initialPickId,
       initialReply,
       criticVerdict,

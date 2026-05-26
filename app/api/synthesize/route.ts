@@ -22,6 +22,7 @@ export async function POST(request: Request) {
 
   const personaId: string =
     typeof body?.personaId === "string" ? body.personaId : "maya";
+  const customPersona = body?.customPersona;
   const initialPickId: string =
     typeof body?.initialPickId === "string" ? body.initialPickId : "";
   const initialReply: string =
@@ -46,6 +47,7 @@ export async function POST(request: Request) {
     criticVerdict,
     criticReasoning,
     criticMissed,
+    customPersona,
   });
   return result.toTextStreamResponse();
 }

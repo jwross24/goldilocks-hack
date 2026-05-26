@@ -21,6 +21,7 @@ export async function POST(request: Request) {
     typeof body?.personaId === "string" ? body.personaId : "maya";
   const pickedSofaId: string =
     typeof body?.pickedSofaId === "string" ? body.pickedSofaId : "";
+  const customPersona = body?.customPersona;
 
   if (!pickedSofaId) {
     return Response.json(
@@ -29,6 +30,6 @@ export async function POST(request: Request) {
     );
   }
 
-  const result = streamCritique(personaId, pickedSofaId);
+  const result = streamCritique(personaId, pickedSofaId, customPersona);
   return result.toTextStreamResponse();
 }

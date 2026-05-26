@@ -264,6 +264,7 @@ export function GoldilocksApp() {
             {matchSettled && pickId && (
               <CriticCard
                 personaId={personaId}
+                customPersona={isCustomActive ? customPersona : null}
                 pickedSofaId={pickId}
                 onSnapshot={setCriticSnap}
               />
@@ -337,17 +338,27 @@ export function GoldilocksApp() {
                 <p className="font-display text-[1.5rem] italic leading-tight text-[color:var(--ink-soft)]">
                   {matchSettled ? (
                     `${assessmentsCount} measured. One fits.`
+                  ) : assessmentsCount >= CORPUS_SIZE ? (
+                    <>
+                      All measured. Picking the just-right one
+                      <span
+                        aria-hidden
+                        className="prime-breathe ml-1 not-italic"
+                      >
+                        ″
+                      </span>
+                    </>
                   ) : (
                     <>
                       <span className="cited not-italic text-[color:var(--ink)]">
                         {assessmentsCount}
-                      </span>{" "}
-                      of{" "}
-                      <span className="cited not-italic">{CORPUS_SIZE}</span>{" "}
-                      measured
+                      </span>
+                      <span className="px-1.5">of</span>
+                      <span className="cited not-italic">{CORPUS_SIZE}</span>
+                      <span className="pl-1.5">measured</span>
                       <span
                         aria-hidden
-                        className="prime-breathe ml-0.5 inline-block not-italic"
+                        className="prime-breathe ml-1 not-italic"
                       >
                         ″
                       </span>
@@ -375,6 +386,7 @@ export function GoldilocksApp() {
             {matchSettled && pickId && criticSnap?.settled && (
               <SynthesisCard
                 personaId={personaId}
+                customPersona={isCustomActive ? customPersona : null}
                 initialPickId={pickId}
                 initialReply={draftedReply}
                 criticVerdict={criticSnap.verdict}
