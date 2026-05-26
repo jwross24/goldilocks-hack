@@ -150,13 +150,20 @@ export function AssessmentCard({
 
       {assessment.primary_reason && (
         <p className="mt-3 max-w-[60ch] text-[0.9375rem] leading-relaxed text-[color:var(--ink-soft)]">
-          {assessment.primary_reason}
+          {/* Strip raw enum leaks like 'JUST_RIGHT', 'TOO_LOW' that TIM
+              sometimes spills into user-facing prose. */}
+          {assessment.primary_reason
+            .replace(/\bJUST_RIGHT\b/g, "just right")
+            .replace(/\bTOO_LOW\b/g, "too low")
+            .replace(/\bTOO_HIGH\b/g, "too high")
+            .replace(/\bOVER_BUDGET\b/g, "over budget")
+            .replace(/\bBORDERLINE\b/g, "borderline")}
         </p>
       )}
 
-      {(assessment.cited_value || gap) && (
+      {((assessment.cited_value && assessment.cited_value !== "null") || gap) && (
         <div className="mt-3 flex items-baseline gap-6">
-          {assessment.cited_value && (
+          {assessment.cited_value && assessment.cited_value !== "null" && (
             <span className="cited-quiet text-xs">
               {assessment.cited_value}
             </span>
@@ -180,10 +187,16 @@ export function AssessmentCard({
             aria-hidden
             className="rule-draw mb-4 block h-px w-16 bg-[color:var(--ember-deep)]"
           />
-          {/* The brand thesis at peak: the number IS the typography. */}
+          {/* The brand thesis at peak: the number IS the typography.
+              Only render when the cited number ACTUALLY falls within the
+              customer's comfort range — never lie. */}
           {assessment.cited_value && (() => {
             const numMatch = assessment.cited_value.match(/(\d+(?:\.\d+)?)/);
             if (!numMatch) return null;
+            const value = parseFloat(numMatch[1]);
+            const lo = persona.constraints.seat_height_in.min;
+            const hi = persona.constraints.seat_height_in.max;
+            if (Number.isNaN(value) || value < lo || value > hi) return null;
             return (
               <div className="mb-2 flex items-baseline gap-4">
                 <span className="cited tabular text-[var(--display-xl)] font-medium leading-none text-[color:var(--ember-deep)]">
@@ -191,8 +204,7 @@ export function AssessmentCard({
                   <span className="not-italic">″</span>
                 </span>
                 <span className="eyebrow">
-                  centered in your {persona.constraints.seat_height_in.min}–
-                  {persona.constraints.seat_height_in.max}″ range
+                  within your {lo}–{hi}″ range
                 </span>
               </div>
             );

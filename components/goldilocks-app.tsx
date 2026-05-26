@@ -70,7 +70,14 @@ export function GoldilocksApp() {
   const matchIndex = useMemo(() => {
     const id = synthesisPickId ?? pickId;
     if (!id) return -1;
-    return uniqueAssessments.findIndex((a) => a?.sofa_id === id);
+    const idx = uniqueAssessments.findIndex((a) => a?.sofa_id === id);
+    if (idx === -1) return -1;
+    // Defensive: don't celebrate as "the match" if the verdict for that sofa
+    // says it's not actually JUST_RIGHT or BORDERLINE. Prevents nonsense like
+    // "Carlos, this one." being slapped on a sofa marked TOO LOW.
+    const v = uniqueAssessments[idx]?.verdict;
+    if (v && v !== "JUST_RIGHT" && v !== "BORDERLINE") return -1;
+    return idx;
   }, [pickId, synthesisPickId, uniqueAssessments]);
   // Only treat as "matched" once the stream is settled (we have summary) —
   // otherwise the climax fires before stillness is earned.
