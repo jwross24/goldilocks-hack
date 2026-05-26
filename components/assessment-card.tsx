@@ -163,11 +163,32 @@ export function AssessmentCard({
 
       {((assessment.cited_value && assessment.cited_value !== "null") || gap) && (
         <div className="mt-3 flex items-baseline gap-6">
-          {assessment.cited_value && assessment.cited_value !== "null" && (
-            <span className="cited-quiet text-xs">
-              {assessment.cited_value}
-            </span>
-          )}
+          {assessment.cited_value && assessment.cited_value !== "null" && (() => {
+            // Normalize cited_value display: ensure $ for over-budget,
+            // ″ for seat-height/depth measurements. TIM is inconsistent.
+            const raw = assessment.cited_value.trim();
+            let display = raw;
+            if (assessment.verdict === "OVER_BUDGET") {
+              // Strip any existing $ + commas, reformat with $ + commas
+              const num = parseFloat(raw.replace(/[$,]/g, ""));
+              if (!Number.isNaN(num)) {
+                display = `$${num.toLocaleString()}`;
+              }
+            } else {
+              // Treat as inches measurement. Replace "in" with ″, or add ″
+              // if the value is bare digits.
+              display = raw
+                .replace(/\s*inches?\b/gi, "″")
+                .replace(/\s*in\b/gi, "″")
+                .replace(/\s*″\s*″/g, "″");
+              if (/^\d+(\.\d+)?$/.test(display.trim())) {
+                display = `${display.trim()}″`;
+              }
+            }
+            return (
+              <span className="cited-quiet text-xs">{display}</span>
+            );
+          })()}
           {gap && (
             <span className="cited tabular text-xs text-[color:var(--reject)]">
               {gap.gap}
