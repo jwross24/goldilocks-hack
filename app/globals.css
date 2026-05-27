@@ -145,6 +145,37 @@ body {
 }
 .reveal { animation: reveal 420ms cubic-bezier(0.16, 1, 0.3, 1) both; }
 
+/* Height-interpolation wrapper — when a streaming section grows from
+   nothing → tall, this lets the browser animate `height: auto` so growth
+   reads as intentional instead of popping. Falls back to no-animation on
+   browsers without `interpolate-size`. */
+.grow-smooth {
+  interpolate-size: allow-keywords;
+  transition:
+    height 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Pre-allocated slot — reserves vertical space so streaming content can
+   fade into already-settled layout instead of pushing the page taller.
+   Tuned to roughly match the rendered card so reflow is invisible. */
+.slot-reserve {
+  min-height: var(--slot-min, 0);
+}
+
+/* Drop-cap — applied to the FIRST ALPHA character via a leading span, not
+   via `::first-letter` which would catch the curly quote glyph instead. */
+.drop-cap {
+  font-family: var(--font-display);
+  font-style: normal;
+  float: left;
+  padding-right: 0.5rem;
+  padding-top: 0.25rem;
+  font-size: 2.5rem;
+  line-height: 0.85;
+  color: var(--ember-deep);
+}
+
 /* Loading breathing — for the prime mark ″ used as a heartbeat during waits */
 @keyframes prime-breathe {
   0%, 100% { opacity: 0.15; transform: scale(1); }
@@ -174,5 +205,5 @@ body {
 
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .reveal, .dimmed { animation: none; transition: none; }
+  .reveal, .dimmed, .grow-smooth { animation: none; transition: none; }
 }

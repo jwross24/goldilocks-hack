@@ -27,6 +27,50 @@ type VerdictKey = keyof typeof VERDICT_TEXT;
 const isVerdict = (v: unknown): v is VerdictKey =>
   typeof v === "string" && v in VERDICT_TEXT;
 
+/**
+ * Scrub critic prose before rendering. Strips:
+ *  - JSON field-name leaks ("seat_height_in", "max_budget_usd") → readable.
+ *  - Critic enum leaks ("AGREE_WITH_CAVEAT") that sometimes survive into prose.
+ *  - Chain-of-thought tics ("Wait,", "Actually,", "Let me reconsider").
+ *  - Raw schema tails (dangling `}` or `]`).
+ * Returns null if nothing usable remains.
+ */
+function scrubCriticProse(text: string | null | undefined): string | null {
+  if (!text) return null;
+  let s = text.trim();
+  if (!s || s.toLowerCase() === "null") return null;
+  // Strip leading wrapping quotes (curly or straight).
+  s = s.replace(/^["'“”‘’]+/, "");
+  // JSON field-name leaks.
+  s = s
+    .replace(/\bseat_height_in\b/gi, "seat height")
+    .replace(/\bseat_depth_in\b/gi, "seat depth")
+    .replace(/\bmax_seat_depth_in\b/gi, "max seat depth")
+    .replace(/\bmax_budget_usd\b/gi, "budget")
+    .replace(/\bprice_usd\b/gi, "price")
+    .replace(/\bfirm_cushion_preferred\b/gi, "firm cushion preference");
+  // Critic + Goldilocks enum leaks.
+  s = s
+    .replace(/\bAGREE_WITH_CAVEAT\b/g, "agree with a caveat")
+    .replace(/\bAGREE\b/g, "agree")
+    .replace(/\bDISAGREE\b/g, "disagree")
+    .replace(/\bJUST_RIGHT\b/g, "just right")
+    .replace(/\bTOO_LOW\b/g, "too low")
+    .replace(/\bTOO_HIGH\b/g, "too high")
+    .replace(/\bOVER_BUDGET\b/g, "over budget")
+    .replace(/\bBORDERLINE\b/g, "borderline");
+  // Clip at the first CoT tic that bled into the rationale.
+  const cot = /\b(Wait,?|Actually,?|Hmm,?|Let me reconsider|Let me re-evaluate|Let's re-evaluate|On second thought)\b/i;
+  const cotMatch = s.search(cot);
+  if (cotMatch > 0) s = s.slice(0, cotMatch);
+  // Strip dangling JSON tail / trailing commas.
+  s = s.replace(/[\s,]*[}\]]+\s*$/g, "").trim();
+  if (!s) return null;
+  // Reject anything that's only punctuation after scrubbing.
+  if (!/[A-Za-z0-9]/.test(s)) return null;
+  return s;
+}
+
 export interface CriticSnapshot {
   verdict: "AGREE" | "AGREE_WITH_CAVEAT" | "DISAGREE" | undefined;
   reasoning: string | undefined;
@@ -74,8 +118,8 @@ export function CriticCard({
   useEffect(() => () => { lastKey.current = null; }, []);
 
   const verdict = isVerdict(object?.verdict) ? object.verdict : undefined;
-  const reasoning = object?.reasoning;
-  const missed = object?.missed_consideration;
+  const reasoning = scrubCriticProse(object?.reasoning) ?? undefined;
+  const missed = scrubCriticProse(object?.missed_consideration);
   const settled = Boolean(!isLoading && verdict && reasoning);
 
   // Propagate snapshot upward whenever it changes
@@ -96,7 +140,7 @@ export function CriticCard({
         </p>
       </div>
 
-      {isLoading && !object?.reasoning && (
+      {isLoading && !reasoning && (
         <div className="mt-3 flex items-baseline gap-2">
           <span
             aria-hidden
@@ -122,17 +166,17 @@ export function CriticCard({
         </div>
       )}
 
-      {object?.reasoning && (
+      {reasoning && (
         <p className="mt-3 max-w-[42ch] text-[0.9375rem] leading-relaxed text-[color:var(--ink)]">
-          {object.reasoning}
+          {reasoning}
         </p>
       )}
 
-      {object?.missed_consideration && (
+      {missed && (
         <div className="mt-4 border-t border-[color:var(--rule-quiet)] pt-3">
           <p className="eyebrow mb-2 text-[color:var(--maybe)]">One catch</p>
           <p className="max-w-[42ch] text-[0.9375rem] leading-relaxed text-[color:var(--ink-soft)]">
-            {object.missed_consideration}
+            {missed}
           </p>
         </div>
       )}

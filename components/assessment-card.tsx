@@ -32,6 +32,122 @@ const VALID_VERDICTS = new Set<Verdict>([
   "BORDERLINE",
 ]);
 
+/**
+ * Scrub user-facing prose: drop raw enum names, JSON field names, and
+ * chain-of-thought reasoning markers that TIM occasionally lets slip into
+ * `primary_reason`. Returns null if scrubbing leaves nothing meaningful.
+ */
+function scrubProse(text: string): string {
+  let s = text;
+  // Verdict enum leaks → natural language.
+  s = s
+    .replace(/\bJUST_RIGHT\b/g, "just right")
+    .replace(/\bTOO_LOW\b/g, "too low")
+    .replace(/\bTOO_HIGH\b/g, "too high")
+    .replace(/\bOVER_BUDGET\b/g, "over budget")
+    .replace(/\bBORDERLINE\b/g, "borderline");
+  // Common JSON field-name leaks → readable nouns.
+  s = s
+    .replace(/\bseat_height_in\b/gi, "seat height")
+    .replace(/\bseat_depth_in\b/gi, "seat depth")
+    .replace(/\bmax_seat_depth_in\b/gi, "max seat depth")
+    .replace(/\bmax_budget_usd\b/gi, "budget")
+    .replace(/\bprice_usd\b/gi, "price")
+    .replace(/\bfirm_cushion_preferred\b/gi, "firm cushion preference");
+  // Clip at the first chain-of-thought tic if it slipped in mid-sentence.
+  const cot = /\b(Wait,?|Actually,?|Hmm,?|Let me reconsider|Let me re-evaluate|Let's re-evaluate|On second thought)\b/i;
+  const cotMatch = s.search(cot);
+  if (cotMatch > 0) s = s.slice(0, cotMatch);
+  // Strip stray JSON tail like a dangling closing brace.
+  s = s.replace(/[\s,]*[}\]]+\s*$/g, "");
+  return s.trim();
+}
+
+/**
+ * Strip leaked JSON fragments and pull a clean numeric token out of TIM's
+ * `cited_value` field. TIM is inconsistent here — it has been seen emitting:
+ *   - `seat_height_": 15.74`        (raw JSON key + colon)
+ *   - `"seat_height_in": 15.74`     (quoted key + colon)
+ *   - `15.74 inches`, `15.74in`     (unit words)
+ *   - `15.74″.`, `15.74″,`          (trailing punctuation)
+ *   - `15.74″″`, `15.74″ ″`         (doubled prime)
+ *   - `"`, `''`, ASCII " for inches (curly/straight/double-quote variants)
+ *   - `1.574e1`                     (scientific notation)
+ *   - `null`, `"null"`              (the string null)
+ * This helper returns a normalized string ready for display, or null if
+ * nothing usable remains after scrubbing.
+ */
+function normalizeCited(
+  cited: string | undefined,
+  verdict: Verdict | undefined,
+): string | null {
+  if (!cited) return null;
+  let raw = cited.trim();
+  // Anything that's literally null-ish after trim is unusable.
+  if (!raw || raw.toLowerCase() === "null" || raw === '"null"') return null;
+
+  // Strip leaked JSON key syntax at the head: `seat_height_": 15.74` or
+  // `"seat_height_in": 15.74` → `15.74`. Also handle the same pattern after
+  // a comma for multi-field leaks.
+  raw = raw
+    .replace(/^"?[a-z_][a-z0-9_]*"?\s*[:=]\s*/i, "")
+    .replace(/,\s*"?[a-z_][a-z0-9_]*"?\s*[:=]\s*/gi, ", ");
+
+  // Strip wrapping quotes that sometimes survive: `"15.74"` → `15.74`.
+  raw = raw.replace(/^["']+|["']+$/g, "");
+
+  // Strip trailing punctuation that's never meaningful here (period, comma,
+  // semicolon, closing brace/bracket from a half-streamed JSON tail).
+  raw = raw.replace(/[\s.,;:})\]]+$/g, "");
+
+  // Normalize inch units to the prime mark. Handle plural with or without
+  // a leading space (`15.74inches`, `15.74 inches`, `15.74 in`, `15.74in`).
+  // Also normalize doubled-quote ASCII (`15.74"`) and apostrophe pairs
+  // (`15.74''`) into the typographic prime.
+  raw = raw
+    .replace(/\s*inches\b/gi, "″")
+    .replace(/\s*inch\b/gi, "″")
+    .replace(/\s*in\b/gi, "″")
+    .replace(/''/g, "″")
+    .replace(/"/g, "″");
+
+  // Collapse runs of primes with any interior whitespace into a single one.
+  raw = raw.replace(/(?:″\s*){2,}/g, "″");
+
+  // Expand scientific notation into a plain decimal if present.
+  const sciMatch = raw.match(/(-?\d+(?:\.\d+)?)[eE]([+-]?\d+)/);
+  if (sciMatch) {
+    const expanded = Number(sciMatch[0]);
+    if (!Number.isNaN(expanded)) {
+      raw = raw.replace(sciMatch[0], expanded.toString());
+    }
+  }
+
+  const cleaned = raw.trim();
+  if (!cleaned) return null;
+  // A token that's only punctuation/whitespace after scrubbing is junk.
+  if (!/[0-9a-zA-Z$]/.test(cleaned)) return null;
+
+  // OVER_BUDGET → render as dollars.
+  if (verdict === "OVER_BUDGET") {
+    const num = parseFloat(cleaned.replace(/[$,]/g, ""));
+    if (!Number.isNaN(num)) return `$${num.toLocaleString()}`;
+    return cleaned;
+  }
+
+  // Bare numeric → infer unit. Numbers under 100 are inches; values ≥ 100
+  // are almost always a price TIM mis-attributed into a non-budget verdict.
+  const bare = cleaned.replace(/[,]/g, "");
+  if (/^-?\d+(\.\d+)?$/.test(bare)) {
+    const val = parseFloat(bare);
+    if (!Number.isNaN(val)) {
+      if (val < 100) return `${bare}″`;
+      return `$${val.toLocaleString()}`;
+    }
+  }
+  return cleaned;
+}
+
 export interface Assessment {
   sofa_id?: string;
   sofa_name?: string;
@@ -155,64 +271,32 @@ export function AssessmentCard({
         )}
       </div>
 
-      {assessment.primary_reason && (
-        <p
-          className="mt-3 line-clamp-3 max-w-[60ch] text-[0.9375rem] leading-relaxed text-[color:var(--ink-soft)]"
-          title={assessment.primary_reason}
-        >
-          {/* Strip raw enum leaks like 'JUST_RIGHT', 'TOO_LOW' that TIM
-              sometimes spills into user-facing prose. */}
-          {assessment.primary_reason
-            .replace(/\bJUST_RIGHT\b/g, "just right")
-            .replace(/\bTOO_LOW\b/g, "too low")
-            .replace(/\bTOO_HIGH\b/g, "too high")
-            .replace(/\bOVER_BUDGET\b/g, "over budget")
-            .replace(/\bBORDERLINE\b/g, "borderline")}
-        </p>
-      )}
+      {assessment.primary_reason && (() => {
+        const cleaned = scrubProse(assessment.primary_reason);
+        if (!cleaned) return null;
+        return (
+          <p
+            className="mt-3 line-clamp-3 max-w-[60ch] text-[0.9375rem] leading-relaxed text-[color:var(--ink-soft)]"
+            title={cleaned}
+          >
+            {cleaned}
+          </p>
+        );
+      })()}
 
-      {((assessment.cited_value && assessment.cited_value !== "null") || gap) && (
+      {(() => {
+        const citedDisplay = normalizeCited(
+          assessment.cited_value,
+          assessment.verdict,
+        );
+        if (!citedDisplay && !gap && assessment.verdict !== "OVER_BUDGET") {
+          return null;
+        }
+        return (
         <div className="mt-3 flex flex-wrap items-baseline gap-x-6 gap-y-1">
-          {assessment.cited_value && assessment.cited_value !== "null" && (() => {
-            // Normalize cited_value display: ensure $ for over-budget,
-            // ″ for seat-height/depth measurements. TIM is inconsistent.
-            // First, strip any leaked JSON field syntax like
-            // `seat_height_": 15.74` → `15.74`.
-            const raw = assessment.cited_value
-              .trim()
-              .replace(/^[a-z_]+["':\s]+/i, "")
-              .replace(/,\s*[a-z_]+["':\s]+/gi, ", ");
-            let display = raw;
-            if (assessment.verdict === "OVER_BUDGET") {
-              // Strip any existing $ + commas, reformat with $ + commas
-              const num = parseFloat(raw.replace(/[$,]/g, ""));
-              if (!Number.isNaN(num)) {
-                display = `$${num.toLocaleString()}`;
-              }
-            } else {
-              // Treat as inches measurement — but only if the value looks
-              // plausibly like inches (< 100). Large bare numbers (e.g.
-              // 1429.99) are TIM mis-emitting a price into a non-budget
-              // verdict; don't slap ″ on them.
-              display = raw
-                .replace(/\s*inches?\b/gi, "″")
-                .replace(/\s*in\b/gi, "″")
-                .replace(/\s*″\s*″/g, "″");
-              const trimmed = display.trim();
-              if (/^\d+(\.\d+)?$/.test(trimmed)) {
-                const val = parseFloat(trimmed);
-                if (!Number.isNaN(val) && val < 100) {
-                  display = `${trimmed}″`;
-                } else if (val >= 100) {
-                  // Probably a price TIM mis-attributed. Render with $ to be safe.
-                  display = `$${val.toLocaleString()}`;
-                }
-              }
-            }
-            return (
-              <span className="cited-quiet text-xs">{display}</span>
-            );
-          })()}
+          {citedDisplay && (
+            <span className="cited-quiet tabular text-xs">{citedDisplay}</span>
+          )}
           {gap && (
             <span className="cited tabular text-xs text-[color:var(--reject)]">
               {gap.gap}
@@ -248,7 +332,8 @@ export function AssessmentCard({
               );
             })()}
         </div>
-      )}
+        );
+      })()}
 
       {isMatch && (
         <div className="mt-8">

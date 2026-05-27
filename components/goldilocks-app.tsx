@@ -87,6 +87,17 @@ export function GoldilocksApp() {
   const effectiveReply = synthesisReply ?? draftedReply;
   const effectivePickId = synthesisPickId ?? pickId;
 
+  // Split the reply into its first alpha character + the rest so the
+  // decorative drop-cap targets the real first letter ("M" in "Maya, …")
+  // and not the curly opening quote. We render the quote as a sibling
+  // decorative span; the drop-cap span carries the styling.
+  const replyParts = (() => {
+    if (!effectiveReply) return null;
+    const match = effectiveReply.match(/^(\s*)([A-Za-z])([\s\S]*)$/);
+    if (!match) return { lead: "", first: "", rest: effectiveReply };
+    return { lead: match[1], first: match[2], rest: match[3] };
+  })();
+
   const lastSubmittedKey = useRef<string | null>(null);
   // Internal runner that takes the persona explicitly — used both by the
   // header Run button (reads current state) and by handleCustomSubmit
@@ -252,29 +263,45 @@ export function GoldilocksApp() {
               <PersonaCard persona={persona} />
             )}
 
-            {!showCustomForm && effectiveReply && matchSettled && (
-              <section className="border-t border-[color:var(--rule-quiet)] pt-6">
-                <p className="eyebrow mb-3 text-[color:var(--right)]">
-                  Goldilocks &rarr; {persona.name}
-                  {synthesisReply && synthesisPickId && synthesisPickId !== pickId && (
-                    <span className="ml-2 text-[color:var(--ember-deep)] normal-case tracking-normal">
-                      (revised)
-                    </span>
-                  )}
-                </p>
-                <p className="font-display text-[1.125rem] italic leading-snug text-[color:var(--ink)] [&::first-letter]:font-display [&::first-letter]:not-italic [&::first-letter]:float-left [&::first-letter]:pr-2 [&::first-letter]:pt-1 [&::first-letter]:text-[2.5rem] [&::first-letter]:leading-[0.85] [&::first-letter]:text-[color:var(--ember-deep)]">
-                  &ldquo;{effectiveReply}&rdquo;
-                </p>
-              </section>
-            )}
-
             {!showCustomForm && matchSettled && pickId && (
-              <CriticCard
-                personaId={personaId}
-                customPersona={isCustomActive ? customPersona : null}
-                pickedSofaId={pickId}
-                onSnapshot={setCriticSnap}
-              />
+              <div
+                className="grow-smooth slot-reserve space-y-8"
+                style={{ ["--slot-min" as string]: "16rem" }}
+              >
+                {effectiveReply && replyParts && (
+                  <section className="reveal border-t border-[color:var(--rule-quiet)] pt-6">
+                    <p className="eyebrow mb-3 text-[color:var(--right)]">
+                      Goldilocks &rarr; {persona.name}
+                      {synthesisReply &&
+                        synthesisPickId &&
+                        synthesisPickId !== pickId && (
+                          <span className="ml-2 text-[color:var(--ember-deep)] normal-case tracking-normal">
+                            (revised)
+                          </span>
+                        )}
+                    </p>
+                    <p className="font-display text-[1.125rem] italic leading-snug text-[color:var(--ink)]">
+                      {replyParts.first && (
+                        <span className="drop-cap" aria-hidden>
+                          {replyParts.first}
+                        </span>
+                      )}
+                      <span className="sr-only">
+                        {replyParts.lead}
+                        {replyParts.first}
+                      </span>
+                      {replyParts.rest}
+                    </p>
+                  </section>
+                )}
+
+                <CriticCard
+                  personaId={personaId}
+                  customPersona={isCustomActive ? customPersona : null}
+                  pickedSofaId={pickId}
+                  onSnapshot={setCriticSnap}
+                />
+              </div>
             )}
           </aside>
 
@@ -387,18 +414,27 @@ export function GoldilocksApp() {
 
             {!showCustomForm && <TopPicksList topPicks={topPicks as never} />}
 
-            {!showCustomForm && matchSettled && pickId && criticSnap?.settled && (
-              <SynthesisCard
-                personaId={personaId}
-                customPersona={isCustomActive ? customPersona : null}
-                initialPickId={pickId}
-                initialReply={draftedReply}
-                criticVerdict={criticSnap.verdict}
-                criticReasoning={criticSnap.reasoning}
-                criticMissed={criticSnap.missed}
-                onUpdatedReply={setSynthesisReply}
-                onFinalPick={setSynthesisPickId}
-              />
+            {!showCustomForm && matchSettled && pickId && (
+              <div
+                className="grow-smooth slot-reserve"
+                style={{ ["--slot-min" as string]: "18rem" }}
+              >
+                {criticSnap?.settled && (
+                  <div className="reveal">
+                    <SynthesisCard
+                      personaId={personaId}
+                      customPersona={isCustomActive ? customPersona : null}
+                      initialPickId={pickId}
+                      initialReply={draftedReply}
+                      criticVerdict={criticSnap.verdict}
+                      criticReasoning={criticSnap.reasoning}
+                      criticMissed={criticSnap.missed}
+                      onUpdatedReply={setSynthesisReply}
+                      onFinalPick={setSynthesisPickId}
+                    />
+                  </div>
+                )}
+              </div>
             )}
 
             {error && (
