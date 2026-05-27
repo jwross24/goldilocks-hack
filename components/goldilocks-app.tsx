@@ -162,16 +162,20 @@ export function GoldilocksApp() {
                 Furniture that fits, by the inch.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={handleRun}
-              disabled={isLoading}
-              className={`rounded-full bg-[color:var(--ink)] px-6 py-2.5 text-sm font-medium text-[color:var(--paper)] transition hover:bg-[color:var(--ember-deep)] disabled:opacity-50 ${FOCUS_RING}`}
-            >
-              {isLoading && resultsForPersonaId === personaId
-                ? "Measuring…"
-                : `Run for ${persona.name}`}
-            </button>
+            {!showCustomForm && (
+              <button
+                type="button"
+                onClick={handleRun}
+                disabled={isLoading}
+                className={`shrink-0 rounded-full bg-[color:var(--ink)] px-6 py-2.5 text-sm font-medium text-[color:var(--paper)] transition-colors duration-200 ease-out hover:bg-[color:var(--ember-deep)] disabled:cursor-not-allowed disabled:opacity-50 ${FOCUS_RING}`}
+              >
+                <span className="block max-w-[14rem] truncate">
+                  {isLoading && resultsForPersonaId === personaId
+                    ? "Measuring…"
+                    : `Run for ${persona.name}`}
+                </span>
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -191,17 +195,21 @@ export function GoldilocksApp() {
                     type="button"
                     onClick={() => handlePersonaSwitch(p.id)}
                     aria-current={active ? "page" : undefined}
-                    className={`group inline-flex items-baseline gap-2 transition ${FOCUS_RING} ${
+                    className={`group inline-flex cursor-pointer items-baseline gap-2 rounded-sm transition-colors duration-200 ease-out ${FOCUS_RING} ${
                       active
                         ? "text-[color:var(--ink)]"
                         : "text-[color:var(--ink-quiet)] hover:text-[color:var(--ink)]"
                     }`}
                   >
-                    <span className="cited-quiet tabular text-xs">
+                    <span
+                      className={`cited-quiet tabular text-xs transition-colors duration-200 ease-out ${
+                        active ? "text-[color:var(--ember-deep)]" : ""
+                      }`}
+                    >
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     <span
-                      className={`font-display text-[1.0625rem] italic leading-none tracking-tight ${
+                      className={`font-display text-[1.0625rem] italic leading-none tracking-tight transition-colors duration-200 ease-out ${
                         active ? "text-[color:var(--ember-deep)]" : ""
                       }`}
                     >
@@ -217,15 +225,24 @@ export function GoldilocksApp() {
                 type="button"
                 onClick={handleCustomTabClick}
                 aria-current={isCustomActive || showCustomForm ? "page" : undefined}
-                className={`group inline-flex items-baseline gap-2 transition ${FOCUS_RING} ${
+                title={customPersona?.name ?? "Describe yourself"}
+                className={`group inline-flex cursor-pointer items-baseline gap-2 rounded-sm transition-colors duration-200 ease-out ${FOCUS_RING} ${
                   isCustomActive || showCustomForm
                     ? "text-[color:var(--ink)]"
                     : "text-[color:var(--ink-quiet)] hover:text-[color:var(--ink)]"
                 }`}
               >
-                <span className="cited-quiet tabular text-xs">+</span>
                 <span
-                  className={`font-display text-[1.0625rem] italic leading-none tracking-tight ${
+                  className={`cited-quiet tabular text-xs transition-colors duration-200 ease-out ${
+                    isCustomActive || showCustomForm
+                      ? "text-[color:var(--ember-deep)]"
+                      : ""
+                  }`}
+                >
+                  +
+                </span>
+                <span
+                  className={`max-w-[12rem] truncate font-display text-[1.0625rem] italic leading-none tracking-tight transition-colors duration-200 ease-out ${
                     isCustomActive || showCustomForm
                       ? "text-[color:var(--ember-deep)]"
                       : ""
@@ -361,7 +378,7 @@ export function GoldilocksApp() {
                     <button
                       type="button"
                       onClick={stop}
-                      className={`text-xs text-[color:var(--ink-quiet)] hover:text-[color:var(--ink)] ${FOCUS_RING}`}
+                      className={`cursor-pointer rounded-sm px-1 text-xs text-[color:var(--ink-quiet)] transition-colors duration-200 ease-out hover:text-[color:var(--ink)] ${FOCUS_RING}`}
                     >
                       Stop
                     </button>
@@ -438,10 +455,21 @@ export function GoldilocksApp() {
             )}
 
             {error && (
-              <p className="mt-8 border-t border-[color:var(--reject-edge)] pt-4 text-sm text-[color:var(--reject)]">
-                Something went off-spec. Try again, or pick a different
-                customer.
-              </p>
+              <div
+                role="alert"
+                className="mt-8 border-t border-[color:var(--reject-edge)] pt-4"
+              >
+                <p className="eyebrow text-[color:var(--reject)]">
+                  Something went off-spec
+                </p>
+                <p className="mt-2 max-w-[60ch] text-sm leading-relaxed text-[color:var(--ink-soft)]">
+                  The measurement didn&rsquo;t complete. Try{" "}
+                  <span className="text-[color:var(--ink)]">
+                    Run for {persona.name}
+                  </span>{" "}
+                  again, or pick a different customer.
+                </p>
+              </div>
             )}
           </section>
         </div>

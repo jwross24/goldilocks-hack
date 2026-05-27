@@ -256,7 +256,10 @@ export function AssessmentCard({
             <span className="cited-quiet tabular text-xs">
               {String(index + 1).padStart(2, "0")}
             </span>
-            <h3 className="truncate text-[1.0625rem] font-medium leading-tight text-[color:var(--ink)]">
+            <h3
+              className="truncate text-[1.0625rem] font-medium leading-tight text-[color:var(--ink)]"
+              title={assessment.sofa_name ?? undefined}
+            >
               {assessment.sofa_name ?? "…"}
             </h3>
           </div>
@@ -372,10 +375,15 @@ export function AssessmentCard({
               href={sofaUrlById[assessment.sofa_id]}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-4 inline-flex items-baseline gap-2 text-sm text-[color:var(--ink)] underline decoration-[color:var(--ember-deep)] decoration-2 underline-offset-4 transition hover:text-[color:var(--ember-deep)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[color:var(--ember-deep)]"
+              className="group/cta mt-4 inline-flex cursor-pointer items-baseline gap-2 rounded-sm text-sm text-[color:var(--ink)] underline decoration-[color:var(--ember-deep)] decoration-2 underline-offset-4 transition-colors duration-200 ease-out hover:text-[color:var(--ember-deep)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[color:var(--ember-deep)]"
             >
               Take {persona.name} to this sofa
-              <span aria-hidden>&rarr;</span>
+              <span
+                aria-hidden
+                className="transition-transform duration-200 ease-out group-hover/cta:translate-x-0.5"
+              >
+                &rarr;
+              </span>
             </a>
           )}
         </div>

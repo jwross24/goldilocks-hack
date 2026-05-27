@@ -314,9 +314,9 @@ export function CustomPersonaForm({
             className={inputCls}
           />
           <p className={hintCls}>
-            Or just describe yourself here, leave the fields blank, and
-            hit <span className="font-medium text-[color:var(--ink)]">Measure</span>{" "}
-            &mdash; Goldilocks will figure out the numbers.
+            Or skip the fields, write a sentence here, and hit{" "}
+            <span className="font-medium text-[color:var(--ink)]">Measure</span>
+            . Goldilocks will read the prose and fill the numbers.
           </p>
           {extractRationale && (
             <p className="mt-2 max-w-[60ch] text-[0.8125rem] italic leading-relaxed text-[color:var(--ink-quiet)]">
@@ -327,27 +327,47 @@ export function CustomPersonaForm({
         </div>
       </div>
 
-      <div className="mt-8 flex items-baseline gap-4">
-        <button
-          type="submit"
-          disabled={
-            (!valid && !context.trim()) ||
-            extraction.isLoading ||
-            pendingAutoSubmit
-          }
-          className={`rounded-full bg-[color:var(--ink)] px-6 py-2.5 text-sm font-medium text-[color:var(--paper)] transition hover:bg-[color:var(--ember-deep)] disabled:opacity-40 ${FOCUS_RING}`}
-        >
-          {extraction.isLoading || pendingAutoSubmit
-            ? "Reading your description…"
-            : `Measure for ${name.trim() || "me"}`}
-        </button>
+      <div className="mt-8 flex flex-wrap items-baseline gap-x-4 gap-y-2">
+        {(() => {
+          const isBusy = extraction.isLoading || pendingAutoSubmit;
+          const isEmpty = !valid && !context.trim();
+          const disabled = isEmpty || isBusy;
+          const title = isBusy
+            ? "Reading your description"
+            : isEmpty
+              ? "Add numbers or describe yourself, then Measure."
+              : undefined;
+          return (
+            <button
+              type="submit"
+              disabled={disabled}
+              title={title}
+              aria-disabled={disabled || undefined}
+              className={`shrink-0 cursor-pointer rounded-full bg-[color:var(--ink)] px-6 py-2.5 text-sm font-medium text-[color:var(--paper)] transition-colors duration-200 ease-out hover:bg-[color:var(--ember-deep)] disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS_RING}`}
+            >
+              <span className="block max-w-[16rem] truncate">
+                {isBusy
+                  ? "Reading your description…"
+                  : `Measure for ${name.trim() || "me"}`}
+              </span>
+            </button>
+          );
+        })()}
         <button
           type="button"
           onClick={onCancel}
-          className={`text-sm text-[color:var(--ink-quiet)] hover:text-[color:var(--ink)] ${FOCUS_RING}`}
+          className={`cursor-pointer rounded-sm px-1 text-sm text-[color:var(--ink-quiet)] transition-colors duration-200 ease-out hover:text-[color:var(--ink)] ${FOCUS_RING}`}
         >
           Cancel
         </button>
+        {!valid && !context.trim() && !extraction.isLoading && !pendingAutoSubmit && (
+          <p
+            id="cp-submit-hint"
+            className="basis-full text-[0.75rem] italic leading-snug text-[color:var(--ink-quiet)]"
+          >
+            Fill the comfort range, or write a sentence about yourself.
+          </p>
+        )}
       </div>
     </form>
   );

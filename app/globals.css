@@ -73,12 +73,32 @@ html, body { background: var(--paper); }
 body {
   color: var(--ink);
   font-family: var(--font-sans);
+  /* Manrope cv11 = single-story 'g' (more humanist, less geometric).
+     ss01 = stylistic set 1 (alt 'l' tail) for friendlier sans rhythm.
+     Lining proportional figures by default; numeric tables opt into .tabular. */
   font-feature-settings: "ss01", "cv11";
+  font-variant-numeric: lining-nums proportional-nums;
   text-rendering: optimizeLegibility;
 }
 
-/* Tabular figures for any numeric data — clean alignment without going mono everywhere */
-.tabular { font-variant-numeric: tabular-nums; }
+/* Source Serif 4 — when used as display, enable contextual alternates and
+   discretionary ligatures (cleaner 'fi'/'fl', polished italic joins). The
+   variable opsz axis is already exposed via next/font; Source Serif uses it
+   automatically based on rendered size, so no explicit font-optical-sizing
+   declaration is needed (it defaults to `auto`). */
+.font-display,
+[class*="font-display"] {
+  font-feature-settings: "calt", "liga", "dlig", "kern";
+  font-variant-numeric: lining-nums proportional-nums;
+}
+
+/* Tabular figures for any numeric data — clean alignment without going mono everywhere.
+   Force lining figures too, so digits sit on baseline + cap-height, not the
+   oldstyle x-height drop that Source Serif would otherwise pull in. */
+.tabular {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum", "lnum";
+}
 
 /* Eyebrow: small caps, wide tracking — for section labels */
 .eyebrow {
@@ -98,20 +118,27 @@ body {
   letter-spacing: -0.02em;
   line-height: 0.95;
   color: var(--ink);
+  text-wrap: balance;
 }
 
-/* The cited number — JetBrains Mono, restrained, used sparingly */
+/* The cited number — JetBrains Mono, restrained, used sparingly.
+   Tabular + lining locked in: every "17.5″" should have identical advance
+   width regardless of digit, so columns of measurements align cleanly. */
 .cited {
   font-family: var(--font-mono);
   font-weight: 500;
   letter-spacing: 0;
   color: var(--ink);
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum", "lnum", "zero";
 }
 
 .cited-quiet {
   font-family: var(--font-mono);
   font-weight: 400;
   color: var(--ink-quiet);
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum", "lnum", "zero";
 }
 
 /* Verdict-dot pulse — single ring expansion on arrival, then dies forever.
@@ -164,16 +191,26 @@ body {
 }
 
 /* Drop-cap — applied to the FIRST ALPHA character via a leading span, not
-   via `::first-letter` which would catch the curly quote glyph instead. */
+   via `::first-letter` which would catch the curly quote glyph instead.
+   Source Serif's cap is tall; line-height: 1 + a small negative margin pulls
+   the glyph's optical top in line with the body's cap-height instead of its
+   font bounding box (which would float visibly above the first line). */
 .drop-cap {
   font-family: var(--font-display);
   font-style: normal;
   float: left;
-  padding-right: 0.5rem;
-  padding-top: 0.25rem;
-  font-size: 2.5rem;
-  line-height: 0.85;
+  padding-right: 0.4rem;
+  /* Negative margin pulls the giant glyph up so its cap-height aligns with
+     the body's first-line cap-height. Source Serif has ~5% headroom above
+     its caps — the -0.08em compensates without overshooting. */
+  margin-top: -0.08em;
+  margin-bottom: -0.1em;
+  font-size: 3.25rem;
+  line-height: 1;
   color: var(--ember-deep);
+  /* Source Serif drop-caps benefit from contextual alternates (calt) so a
+     stylized initial doesn't collide visually with the lining figure run. */
+  font-feature-settings: "calt", "liga", "kern";
 }
 
 /* Loading breathing — for the prime mark ″ used as a heartbeat during waits */
@@ -203,7 +240,55 @@ body {
   transition: opacity 180ms ease-out !important;
 }
 
+/* Text-wrap utilities — progressive enhancement, older browsers ignore these
+   and fall back to normal wrapping. Both deliver editorial-grade line breaks
+   without manual <br/> fiddling on responsive widths. */
+
+/* `balance` — evenly distributes words across lines. Best for short editorial
+   blocks: display headlines, persona names, pull-quotes. Limited to ~6 lines
+   by spec, so don't use on long paragraphs. */
+.balance { text-wrap: balance; }
+
+/* `pretty` — same goals as default but prevents orphans (single-word last
+   line) and improves last-line distribution. Cheap on long prose. */
+.pretty { text-wrap: pretty; }
+
+/* Hanging punctuation — the curly quote / em-dash / period hangs into the
+   margin so the *text* edge stays optically aligned. Source Serif body
+   paragraphs read noticeably more "magazine" with this on. Safari supports
+   first/last; other engines ignore it — graceful degrade. */
+.hang { hanging-punctuation: first last; }
+
+/* Apply editorial defaults to every Source Serif display heading without
+   touching component JSX. `text-wrap: balance` is safe on h1–h3 because
+   they're naturally short; the explicit <br/>s in the hero still take
+   precedence (balance only acts on remaining soft wraps). */
+h1.font-display,
+h2.font-display,
+h3.font-display,
+[class*="font-display"]:is(h1, h2, h3),
+.lockup-display {
+  text-wrap: balance;
+}
+
+/* Body prose containers — apply pretty wrapping + hanging punctuation by
+   default on the editorial-italic reply paragraph and other body prose.
+   These are additive: any element that opts in via `.prose-body` gets the
+   typographic upgrade without affecting layout. */
+.prose-body {
+  text-wrap: pretty;
+  hanging-punctuation: first last;
+}
+
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .reveal, .dimmed, .grow-smooth { animation: none; transition: none; }
+  .reveal,
+  .dimmed,
+  .grow-smooth,
+  .dot-pulse-once,
+  .rule-draw,
+  .prime-breathe {
+    animation: none !important;
+    transition: none !important;
+  }
 }
