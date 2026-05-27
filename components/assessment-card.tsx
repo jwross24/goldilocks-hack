@@ -11,6 +11,12 @@ const sofaUrlById = Object.fromEntries(
   ]),
 );
 
+const sofaHeightById = Object.fromEntries(
+  (sofasData.sofas as Array<{ id: string; seat_height_in?: number }>).map(
+    (s) => [s.id, s.seat_height_in],
+  ),
+);
+
 type Verdict =
   | "JUST_RIGHT"
   | "TOO_LOW"
@@ -46,7 +52,8 @@ function extractGap(
   persona: Persona,
 ) {
   if (!cited || !verdict) return null;
-  const numMatch = cited.match(/(\d+(?:\.\d+)?)/);
+  // Strip commas first so "$1,429.99" parses as 1429.99, not 1.
+  const numMatch = cited.replace(/,/g, "").match(/(\d+(?:\.\d+)?)/);
   if (!numMatch) return null;
   const value = parseFloat(numMatch[1]);
   if (Number.isNaN(value)) return null;
@@ -162,7 +169,32 @@ export function AssessmentCard({
       )}
 
       {((assessment.cited_value && assessment.cited_value !== "null") || gap) && (
-        <div className="mt-3 flex items-baseline gap-6">
+        <div className="mt-3 flex flex-wrap items-baseline gap-x-6 gap-y-1">
+          {/* For OVER_BUDGET rows, TIM cites the price — so the height never
+              surfaces. Pull it from the sofa data so every row shows the
+              dimension that matters. */}
+          {assessment.verdict === "OVER_BUDGET" &&
+            assessment.sofa_id &&
+            typeof sofaHeightById[assessment.sofa_id] === "number" && (() => {
+              const h = sofaHeightById[assessment.sofa_id]!;
+              const lo = persona.constraints.seat_height_in.min;
+              const hi = persona.constraints.seat_height_in.max;
+              const inRange = h >= lo && h <= hi;
+              return (
+                <span className="cited-quiet text-xs">
+                  seat{" "}
+                  <span
+                    className={
+                      inRange
+                        ? "text-[color:var(--right)]"
+                        : "text-[color:var(--ink-soft)]"
+                    }
+                  >
+                    {h}″
+                  </span>
+                </span>
+              );
+            })()}
           {assessment.cited_value && assessment.cited_value !== "null" && (() => {
             // Normalize cited_value display: ensure $ for over-budget,
             // ″ for seat-height/depth measurements. TIM is inconsistent.
