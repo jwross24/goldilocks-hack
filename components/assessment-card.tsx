@@ -156,7 +156,10 @@ export function AssessmentCard({
       </div>
 
       {assessment.primary_reason && (
-        <p className="mt-3 max-w-[60ch] text-[0.9375rem] leading-relaxed text-[color:var(--ink-soft)]">
+        <p
+          className="mt-3 line-clamp-3 max-w-[60ch] text-[0.9375rem] leading-relaxed text-[color:var(--ink-soft)]"
+          title={assessment.primary_reason}
+        >
           {/* Strip raw enum leaks like 'JUST_RIGHT', 'TOO_LOW' that TIM
               sometimes spills into user-facing prose. */}
           {assessment.primary_reason
@@ -170,31 +173,6 @@ export function AssessmentCard({
 
       {((assessment.cited_value && assessment.cited_value !== "null") || gap) && (
         <div className="mt-3 flex flex-wrap items-baseline gap-x-6 gap-y-1">
-          {/* For OVER_BUDGET rows, TIM cites the price — so the height never
-              surfaces. Pull it from the sofa data so every row shows the
-              dimension that matters. */}
-          {assessment.verdict === "OVER_BUDGET" &&
-            assessment.sofa_id &&
-            typeof sofaHeightById[assessment.sofa_id] === "number" && (() => {
-              const h = sofaHeightById[assessment.sofa_id]!;
-              const lo = persona.constraints.seat_height_in.min;
-              const hi = persona.constraints.seat_height_in.max;
-              const inRange = h >= lo && h <= hi;
-              return (
-                <span className="cited-quiet text-xs">
-                  seat{" "}
-                  <span
-                    className={
-                      inRange
-                        ? "text-[color:var(--right)]"
-                        : "text-[color:var(--ink-soft)]"
-                    }
-                  >
-                    {h}″
-                  </span>
-                </span>
-              );
-            })()}
           {assessment.cited_value && assessment.cited_value !== "null" && (() => {
             // Normalize cited_value display: ensure $ for over-budget,
             // ″ for seat-height/depth measurements. TIM is inconsistent.
@@ -244,6 +222,31 @@ export function AssessmentCard({
               </span>
             </span>
           )}
+          {/* For OVER_BUDGET rows, TIM cites the price — so the height never
+              surfaces from cited_value. Pull it from the sofa data and show
+              it as supplementary context (would-have-fit signal). */}
+          {assessment.verdict === "OVER_BUDGET" &&
+            assessment.sofa_id &&
+            typeof sofaHeightById[assessment.sofa_id] === "number" && (() => {
+              const h = sofaHeightById[assessment.sofa_id]!;
+              const lo = persona.constraints.seat_height_in.min;
+              const hi = persona.constraints.seat_height_in.max;
+              const inRange = h >= lo && h <= hi;
+              return (
+                <span className="cited-quiet text-xs">
+                  seat{" "}
+                  <span
+                    className={`tabular ${
+                      inRange
+                        ? "text-[color:var(--right)]"
+                        : "text-[color:var(--ink-soft)]"
+                    }`}
+                  >
+                    {h}″
+                  </span>
+                </span>
+              );
+            })()}
         </div>
       )}
 
