@@ -14,6 +14,18 @@ interface CustomPersonaFormProps {
 const FOCUS_RING =
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--ember-deep)]";
 
+// Guard against TIM inventing a "name" from descriptors. A plausible first
+// name is title-cased, contains no underscores, and isn't a generic tag.
+function isPlausibleName(s: string): boolean {
+  const trimmed = s.trim();
+  if (!trimmed) return false;
+  if (trimmed.includes("_")) return false;
+  if (/^[a-z]/.test(trimmed)) return false; // not title-cased
+  if (/\d/.test(trimmed)) return false;
+  if (trimmed.length > 20) return false;
+  return true;
+}
+
 function buildPersona(
   name: string,
   age: string,
@@ -90,7 +102,8 @@ export function CustomPersonaForm({
     const key = JSON.stringify(e);
     if (key === lastExtractedKey.current) return;
     lastExtractedKey.current = key;
-    if (typeof e.name === "string" && !name.trim()) setName(e.name);
+    if (typeof e.name === "string" && !name.trim() && isPlausibleName(e.name))
+      setName(e.name);
     if (typeof e.age === "number" && !age) setAge(String(e.age));
     if (typeof e.seat_height_min_in === "number")
       setSeatMin(String(e.seat_height_min_in));
@@ -108,8 +121,14 @@ export function CustomPersonaForm({
     if (!pendingAutoSubmit || extraction.isLoading) return;
     if (!extraction.object) return;
     // Build persona from the just-filled state and submit
+    const extractedName =
+      typeof extraction.object.name === "string" &&
+      isPlausibleName(extraction.object.name)
+        ? extraction.object.name
+        : null;
+    const finalName = name.trim() || extractedName || "You";
     const p = buildPersona(
-      extraction.object.name ?? name,
+      finalName,
       extraction.object.age != null ? String(extraction.object.age) : age,
       extraction.object.seat_height_min_in != null
         ? String(extraction.object.seat_height_min_in)

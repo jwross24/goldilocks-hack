@@ -55,6 +55,15 @@ Guidance:
 
 If the prose mentions a specific dollar amount, use it. Otherwise default to 1000.
 
+## NAME RULE (critical)
+
+For the "name" field: return the customer's actual first name ONLY if they
+explicitly write it in first person ("I'm Sam", "My name is Priya", "Call me
+Alex"). Otherwise return null. NEVER invent a name from descriptors like
+"tall", "lumbar", "back-injury" — those are not names. NEVER return
+snake_case identifiers, lowercase tags, or made-up handles. If the customer
+didn't say their name, return null.
+
 Be honest about ambiguity in the rationale. Return strict JSON matching the schema. No prose outside the JSON.`;
 
 export function streamPersonaExtraction(description: string) {
