@@ -114,9 +114,17 @@ export function SynthesisCard({
       </p>
 
       {isLoading && !decision && (
-        <p className="mt-4 font-display text-[1.125rem] italic text-[color:var(--ink-soft)]">
-          Weighing the second opinion&hellip;
-        </p>
+        <div className="mt-4 flex items-baseline gap-2">
+          <span
+            aria-hidden
+            className="prime-breathe inline-block text-[1.125rem] not-italic text-[color:var(--ember-deep)]"
+          >
+            &bull;
+          </span>
+          <p className="font-display text-[1.125rem] italic text-[color:var(--ink-soft)]">
+            Goldilocks is weighing the second opinion&hellip;
+          </p>
+        </div>
       )}
 
       {decision && (

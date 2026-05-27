@@ -97,9 +97,17 @@ export function CriticCard({
       </div>
 
       {isLoading && !object?.reasoning && (
-        <p className="mt-3 font-display text-[1.125rem] italic text-[color:var(--ink-soft)]">
-          Cross-checking on gpt-oss-120b.
-        </p>
+        <div className="mt-3 flex items-baseline gap-2">
+          <span
+            aria-hidden
+            className="prime-breathe inline-block text-[1.125rem] not-italic text-[color:var(--ember-deep)]"
+          >
+            &bull;
+          </span>
+          <p className="font-display text-[1.125rem] italic text-[color:var(--ink-soft)]">
+            A second model is reviewing the pick&hellip;
+          </p>
+        </div>
       )}
 
       {verdict && (

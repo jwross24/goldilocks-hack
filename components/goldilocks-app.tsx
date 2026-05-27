@@ -252,7 +252,7 @@ export function GoldilocksApp() {
               <PersonaCard persona={persona} />
             )}
 
-            {effectiveReply && matchSettled && (
+            {!showCustomForm && effectiveReply && matchSettled && (
               <section className="border-t border-[color:var(--rule-quiet)] pt-6">
                 <p className="eyebrow mb-3 text-[color:var(--right)]">
                   Goldilocks &rarr; {persona.name}
@@ -268,7 +268,7 @@ export function GoldilocksApp() {
               </section>
             )}
 
-            {matchSettled && pickId && (
+            {!showCustomForm && matchSettled && pickId && (
               <CriticCard
                 personaId={personaId}
                 customPersona={isCustomActive ? customPersona : null}
@@ -326,15 +326,21 @@ export function GoldilocksApp() {
 
             {!showCustomForm && isLoading && assessmentsCount === 0 && (
               <div className="border-t border-[color:var(--rule-loud)] pt-8">
-                <p className="eyebrow mb-2">In progress</p>
+                <p className="eyebrow mb-2 text-[color:var(--ember-deep)]">
+                  Working&hellip;
+                </p>
                 <p className="font-display text-[1.5rem] italic text-[color:var(--ink-soft)]">
-                  Measuring {CORPUS_SIZE} sofas
+                  Reading the corpus. Measuring {CORPUS_SIZE} sofas against{" "}
+                  {persona.name}&rsquo;s body
                   <span
                     aria-hidden
                     className="prime-breathe ml-0.5 inline-block not-italic"
                   >
                     ″
                   </span>
+                </p>
+                <p className="cited-quiet mt-3 text-xs">
+                  First verdict in ~2 seconds.
                 </p>
               </div>
             )}
@@ -390,7 +396,7 @@ export function GoldilocksApp() {
 
             {!showCustomForm && <TopPicksList topPicks={topPicks as never} />}
 
-            {matchSettled && pickId && criticSnap?.settled && (
+            {!showCustomForm && matchSettled && pickId && criticSnap?.settled && (
               <SynthesisCard
                 personaId={personaId}
                 customPersona={isCustomActive ? customPersona : null}
