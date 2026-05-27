@@ -324,61 +324,52 @@ export function GoldilocksApp() {
               </div>
             )}
 
-            {!showCustomForm && isLoading && assessmentsCount === 0 && (
+            {!showCustomForm && (isLoading || assessmentsCount > 0) && (
               <div className="border-t border-[color:var(--rule-loud)] pt-8">
-                <p className="eyebrow mb-2 text-[color:var(--ember-deep)]">
-                  Working&hellip;
-                </p>
-                <p className="font-display text-[1.5rem] italic text-[color:var(--ink-soft)]">
-                  Reading the corpus. Measuring {CORPUS_SIZE} sofas against{" "}
-                  {persona.name}&rsquo;s body
-                  <span
-                    aria-hidden
-                    className="prime-breathe ml-0.5 inline-block not-italic"
-                  >
-                    ″
+                <div className="grid grid-cols-[1fr_auto] items-baseline gap-4">
+                  <p className="eyebrow">
+                    {matchSettled ? "The corpus" : "Measuring"}
+                  </p>
+                  {isLoading && (
+                    <button
+                      type="button"
+                      onClick={stop}
+                      className={`text-xs text-[color:var(--ink-quiet)] hover:text-[color:var(--ink)] ${FOCUS_RING}`}
+                    >
+                      Stop
+                    </button>
+                  )}
+                </div>
+                <p className="mt-2 font-display text-[1.5rem] italic leading-tight text-[color:var(--ink-soft)]">
+                  <span className="cited tabular not-italic text-[color:var(--ink)]">
+                    {assessmentsCount}
                   </span>
-                </p>
-                <p className="cited-quiet mt-3 text-xs">
-                  First verdict in ~2 seconds.
+                  <span className="px-1.5">of</span>
+                  <span className="cited tabular not-italic">{CORPUS_SIZE}</span>{" "}
+                  {matchSettled ? (
+                    <>measured. One fits.</>
+                  ) : assessmentsCount >= CORPUS_SIZE ? (
+                    <>
+                      measured. Picking the just-right one
+                      <span aria-hidden className="prime-breathe ml-1 not-italic">
+                        ″
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      measured against{" "}
+                      <span className="not-italic">{persona.name}</span>
+                      <span aria-hidden className="prime-breathe ml-1 not-italic">
+                        ″
+                      </span>
+                    </>
+                  )}
                 </p>
               </div>
             )}
 
             {!showCustomForm && assessmentsCount > 0 && (
               <>
-                <p className="eyebrow mb-2">The corpus</p>
-                <p className="font-display text-[1.5rem] italic leading-tight text-[color:var(--ink-soft)]">
-                  {matchSettled ? (
-                    `${assessmentsCount} measured. One fits.`
-                  ) : assessmentsCount >= CORPUS_SIZE ? (
-                    <>
-                      All measured. Picking the just-right one
-                      <span
-                        aria-hidden
-                        className="prime-breathe ml-1 not-italic"
-                      >
-                        ″
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="cited not-italic text-[color:var(--ink)]">
-                        {assessmentsCount}
-                      </span>
-                      <span className="px-1.5">of</span>
-                      <span className="cited not-italic">{CORPUS_SIZE}</span>
-                      <span className="pl-1.5">measured</span>
-                      <span
-                        aria-hidden
-                        className="prime-breathe ml-1 not-italic"
-                      >
-                        ″
-                      </span>
-                    </>
-                  )}
-                </p>
-
                 <div className="mt-8">
                   {uniqueAssessments.slice(0, CORPUS_SIZE).map((a, i) => (
                     <AssessmentCard
@@ -408,22 +399,6 @@ export function GoldilocksApp() {
                 onUpdatedReply={setSynthesisReply}
                 onFinalPick={setSynthesisPickId}
               />
-            )}
-
-            {isLoading && assessmentsCount > 0 && (
-              <div className="mt-8 grid grid-cols-[3rem_1fr_auto] items-center gap-x-3 border-t border-[color:var(--rule-quiet)] pt-4">
-                <span className="cited-quiet tabular text-xs">
-                  {assessmentsCount} / {CORPUS_SIZE}
-                </span>
-                <span aria-hidden />
-                <button
-                  type="button"
-                  onClick={stop}
-                  className={`text-xs text-[color:var(--ink-quiet)] hover:text-[color:var(--ink)] ${FOCUS_RING}`}
-                >
-                  Stop
-                </button>
-              </div>
             )}
 
             {error && (
