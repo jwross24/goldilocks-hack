@@ -2,7 +2,7 @@
 
 > *Wayfair sells sofas. Goldilocks sells fits.*
 
-**A shopping agent that reads furniture dimensions against your body.** Built solo in four hours for the **Beat The Clock Agent Hack** at Wayfair HQ — Boston Tech Week, May 26 2026. Track 1: Customer Agents.
+**A shopping agent that reads furniture dimensions against your body.** Built solo in two hours for the **Beat The Clock Agent Hack** at Wayfair HQ — Boston Tech Week, May 26 2026. Track 1: Customer Agents.
 
 ---
 
